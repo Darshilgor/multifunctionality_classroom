@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_app/constants.dart';
+import 'package:my_app/utils/constant/constants.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class EventDetails extends StatefulWidget {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:my_app/member.dart';
-import 'package:my_app/subject.dart';
+import 'package:my_app/Home/classroom/classroom%20componant/member.dart';
+import 'package:my_app/Home/classroom/classroom%20componant/subject.dart';
 
 class Classroom extends StatelessWidget {
   const Classroom({super.key});

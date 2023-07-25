@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:my_app/createupdateclass.dart';
-import 'package:my_app/createupdatestudent.dart';
-import 'package:my_app/createupdateteacher.dart';
-import 'package:my_app/updateevent.dart';
-
-import 'Admin/addevent.dart';
+import 'package:my_app/utils/Admin/Admin%20Pages/addevent.dart';
+import 'package:my_app/utils/Admin/Admin%20Pages/createupdateclass.dart';
+import 'package:my_app/utils/Admin/Admin%20Pages/createupdatestudent.dart';
+import 'package:my_app/utils/Admin/Admin%20Pages/createupdateteacher.dart';
+import 'package:my_app/utils/Admin/Admin%20Pages/updateevent.dart';
 
 class AdminPage extends StatefulWidget {
   const AdminPage({super.key});
@@ -22,7 +21,7 @@ class _AdminPageState extends State<AdminPage> {
     'Create Event',
     'Update Event',
     'Create Class',
-    'Select Class'
+    'Select Class',
   ];
   List adminicon = [
     const Icon(
@@ -99,6 +98,7 @@ class _AdminPageState extends State<AdminPage> {
       ),
     );
   }
+
   //design of gridview button
   Widget buildbox(
     String admintext,

@@ -1,9 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:my_app/constants.dart';
-import 'package:my_app/forstudent.dart';
-
+import 'package:my_app/Home/forstudent.dart';
+import 'package:my_app/utils/constant/constants.dart';
 class UserLogIn extends StatefulWidget {
   
   final String user; //define user type

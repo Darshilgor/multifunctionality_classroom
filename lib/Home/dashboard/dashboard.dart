@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:my_app/constants.dart';
-import 'package:my_app/eventdetail.dart';
+import 'package:my_app/Home/dashboard/event%20details%20page/eventdetail.dart';
+import 'package:my_app/utils/constant/constants.dart';
 
 class DashBoard extends StatefulWidget {
   const DashBoard({super.key});

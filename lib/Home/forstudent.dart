@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:my_app/Home/dashboard.dart';
-import 'package:my_app/Home/classroom.dart';
-import 'package:my_app/Home/liveclass.dart';
-import 'package:my_app/Home/profile.dart';
-import 'package:my_app/constants.dart';
-import 'package:my_app/navbar.dart';
+import 'package:my_app/Home/classroom/classroom.dart';
+import 'package:my_app/Home/liveclass/liveclass.dart';
+import 'package:my_app/Home/profile/profile.dart';
+import 'package:my_app/utils/Drawer/navbar.dart';
+import 'package:my_app/utils/constant/constants.dart';
+
+import 'dashboard/dashboard.dart';
 
 class ForStudent extends StatefulWidget {
   const ForStudent({
@@ -39,7 +40,6 @@ class _HomeState extends State<ForStudent> {
       appBar: AppBar(
         centerTitle: true,
         elevation: 6,
-        
         title: (index == 0)
             ? const Text(
                 "Dashboard",
@@ -59,7 +59,6 @@ class _HomeState extends State<ForStudent> {
                         "Profile",
                         style: TextStyle(fontSize: 25),
                       ))),
-
         actions: [
           //popmenu button
           PopupMenuButton(

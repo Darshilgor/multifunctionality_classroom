@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_textfield/dropdown_textfield.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:my_app/adminpage.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:my_app/utils/Admin/adminpage.dart';
 
 class CreateUpdateStudent extends StatefulWidget {
   final String title;
@@ -79,18 +81,24 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
   final createyearkey = GlobalKey<FormState>();
   final updateyearkey = GlobalKey<FormState>();
 
+  final String collection = "Student";
+
   @override
   void initState() {
     super.initState();
     getstudentenrollmentlist(); //getting student enrollmentlist
     getdepartmentlist(); //getting branch list
     getsemesterlist(); //getting semester list
-    getyearlist(); //getting year list
+    getyearlist();
     enrollment = SingleValueDropDownController();
     department = SingleValueDropDownController();
     semester = SingleValueDropDownController();
     year = SingleValueDropDownController();
   }
+
+  File? profileimage;
+  final ImagePicker _picker = ImagePicker();
+  String profilephotourl = '';
 
   @override
   Widget build(BuildContext context) {
@@ -905,8 +913,12 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
         createdepartmentkey.currentState!.validate() &&
         createsemesterkey.currentState!.validate() &&
         createyearkey.currentState!.validate()) {
+      String profilephotourl =
+          'https://firebasestorage.googleapis.com/v0/b/myapp-2bd7a.appspot.com/o/images%2FProfile%2FDefaultProfilePhoto%2Fldpr_logo.png?alt=media&token=86477a33-6c6c-4dcc-b9e1-b70529bfbc45';
       await FirebaseFirestore.instance.collection("Student").doc(id).set(
         {
+          'Profile Photo': profilephotourl.toString(),
+          'Account Type': collection.toString(),
           'First Name': firstnamecontroller.text.toString(),
           'Midle Name': midlenamecontroller.text.toString(),
           'Last Name': lastnamecontroller.text.toString(),
@@ -918,7 +930,13 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
           'Year': year.dropDownValue!.name.toString(),
         },
       ).whenComplete(
-        () {
+        () async {
+          try {
+            await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                email: emailidcontroller.text.toString(), password: '123456');
+          } catch (e) {
+            return;
+          }
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -929,12 +947,6 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
           );
         },
       );
-      try {
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
-            email: emailidcontroller.text.toString(), password: '123456');
-      } catch (e) {
-        return e;
-      }
     }
   }
 

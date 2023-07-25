@@ -63,7 +63,6 @@ class _UpdateEventState extends State<UpdateEvent> {
               ),
               dropdonwfield(
                   context, "Select Event Name", eventnamelist, name, true),
-              
               const SizedBox(
                 height: 15,
               ),
@@ -88,7 +87,6 @@ class _UpdateEventState extends State<UpdateEvent> {
                     ),
                   ),
                   label: const Text("Cordinator Name"),
-                 
                   labelStyle: const TextStyle(fontSize: 20),
                 ),
               ),
@@ -116,7 +114,6 @@ class _UpdateEventState extends State<UpdateEvent> {
                     ),
                   ),
                   label: const Text("Cordinator Email"),
-                  
                   labelStyle: const TextStyle(fontSize: 20),
                 ),
               ),
@@ -182,7 +179,6 @@ class _UpdateEventState extends State<UpdateEvent> {
                   label: const Text(
                     "About Event",
                   ),
-                  
                   labelStyle: const TextStyle(fontSize: 20),
                 ),
               ),
@@ -233,7 +229,6 @@ class _UpdateEventState extends State<UpdateEvent> {
                   ),
                 ),
               ),
-              
               SizedBox(
                 height: 15,
               ),
@@ -264,7 +259,6 @@ class _UpdateEventState extends State<UpdateEvent> {
                         btn(context, Icons.upload, "Upload", upload),
                       ],
                     ),
-                    
                   ],
                 ),
               ),
@@ -277,7 +271,6 @@ class _UpdateEventState extends State<UpdateEvent> {
                     children: [
                       btnn("Clear"),
                       btnnn("Delete"),
-                      
                     ],
                   ),
                 ],
@@ -285,7 +278,6 @@ class _UpdateEventState extends State<UpdateEvent> {
               SizedBox(
                 height: 20,
               ),
-              
               Center(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -312,7 +304,6 @@ class _UpdateEventState extends State<UpdateEvent> {
     );
   }
 
- 
   Future upload() async {
     final pickedfile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedfile != null) {
@@ -321,7 +312,6 @@ class _UpdateEventState extends State<UpdateEvent> {
       });
     }
   }
-  
 
   btn(context, IconData icon, String lable, Function function) {
     return Column(
@@ -449,7 +439,6 @@ class _UpdateEventState extends State<UpdateEvent> {
   }
 
   Future submit() async {
-    
     try {
       final file = File(_imagefile!.path);
 
@@ -471,7 +460,6 @@ class _UpdateEventState extends State<UpdateEvent> {
         child: Text("Error"),
       );
     }
-
   }
 
   set() async {
@@ -533,21 +521,7 @@ class _UpdateEventState extends State<UpdateEvent> {
               ),
               ElevatedButton(
                 onPressed: () async {
-                  Navigator.pop(context);
-                  await FirebaseFirestore.instance
-                      .collection("Events")
-                      .doc(name.dropDownValue!.name)
-                      .delete()
-                      .whenComplete(
-                    () {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text("Event Deleted"),
-                        ),
-                      );
-                    },
-                  );
+                  deletephotoevent();
                 },
                 child: Text("Yes"),
               ),
@@ -662,6 +636,43 @@ class _UpdateEventState extends State<UpdateEvent> {
       ScaffoldMessenger(
         child: Text("Error"),
       );
+    }
+  }
+
+  Future deleteeventphoto() async {
+    await FirebaseStorage.instance
+        .ref()
+        .child('images/Events/CoverPhotos${name.dropDownValue!.name}')
+        .delete();
+  }
+
+  Future deleterevent() async {
+    await FirebaseFirestore.instance
+        .collection('Events')
+        .doc(name.dropDownValue!.name)
+        .delete()
+        .whenComplete(
+      () {
+        Navigator.pop(context);
+      },
+    );
+  }
+
+  Future deletephotoevent() async {
+    try {
+      await FirebaseStorage.instance
+          .ref()
+          .child(
+              'images/Events/CoverPhotos/${name.dropDownValue!.name.toString()}')
+          .delete();
+      await FirebaseFirestore.instance
+          .collection('Events')
+          .doc(name.dropDownValue!.name.toString())
+          .delete();
+      Navigator.pop(context);
+      Navigator.pop(context);
+    } catch (e) {
+      return e;
     }
   }
 }

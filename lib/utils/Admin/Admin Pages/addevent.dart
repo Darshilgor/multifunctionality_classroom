@@ -28,7 +28,6 @@ class _AddEventState extends State<AddEvent> {
   DateTime? _duedate = DateTime.now();
 
   final ImagePicker _picker = ImagePicker();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

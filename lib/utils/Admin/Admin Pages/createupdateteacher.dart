@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_textfield/dropdown_textfield.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:my_app/adminpage.dart';
+import 'package:my_app/utils/Admin/adminpage.dart';
 
 class CreateUpdateTeacher extends StatefulWidget {
   final String title;
@@ -316,6 +317,7 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
       },
     );
   }
+
 // method of snackbar message
   void getupdatemessage() {
     Navigator.push(
@@ -330,6 +332,7 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
       ),
     );
   }
+
 // method of getting teacher-id list
   Future getteachernamelist() async {
     await FirebaseFirestore.instance.collection("Teacher").get().then(
@@ -356,6 +359,7 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
       },
     );
   }
+
 // method of dropdowntextfield
   dropdownfield(
       BuildContext context,
@@ -411,6 +415,7 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
       ],
     );
   }
+
 // method of showdialogbox
   showdialogbox() {
     showDialog(
@@ -454,6 +459,7 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
       ),
     );
   }
+
 // method of teacher name textfield
   creteteachertextformfield() {
     return TextFormField(
@@ -502,6 +508,7 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
       },
     );
   }
+
 // method of delete button
   deletebutton() {
     return ElevatedButton(
@@ -517,6 +524,7 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
       ),
     );
   }
+
 // method of textfield of teacher-id
   teacheridtextfield() {
     return Column(
@@ -552,6 +560,7 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
       ],
     );
   }
+
 // method of textfield of create teacher
   createteachertextfield(
       BuildContext context,
@@ -599,6 +608,7 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
       ],
     );
   }
+
 // method of textfield of update teacher
   updateteachertextfield(
       BuildContext context,
@@ -650,6 +660,7 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
       ],
     );
   }
+
 // method of dropdown of create teacher
   createteacherdropdown(
       BuildContext context,
@@ -712,6 +723,7 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
       ],
     );
   }
+
 // method of dropdown of update teacher
   updateteacherdropdown(
       BuildContext context,
@@ -778,6 +790,7 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
       ],
     );
   }
+
 // method of getting department list
   Future getdepartmentlist() async {
     await FirebaseFirestore.instance.collection("Branch").get().then(
@@ -804,6 +817,7 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
       },
     );
   }
+
 // method of getting year list
   Future getyearlist() async {
     await FirebaseFirestore.instance.collection("Year").get().then(
@@ -830,6 +844,7 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
       },
     );
   }
+
 // clear submit button
   clearsubmitbutton() {
     return Row(
@@ -843,6 +858,7 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
       ],
     );
   }
+
 // cleat update delete button
   cleardeleteupdatebutton() {
     return Column(
@@ -869,7 +885,8 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
       ],
     );
   }
-// button process 
+
+// button process
   button(BuildContext context, String labeltext) {
     return ElevatedButton(
       onPressed: () {
@@ -898,6 +915,7 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
       ),
     );
   }
+
 // clear method
   void clear() {
     firstnamecontroller.clear();
@@ -909,6 +927,7 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
     department.clearDropDown();
     year.clearDropDown();
   }
+
 // method of update student details
   Future updatestudentdetail(BuildContext context, String id) async {
     if (updatefirstnamekey.currentState!.validate() &&
@@ -944,6 +963,7 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
       );
     }
   }
+
 // method of submit process
   Future submit(BuildContext context, String id) async {
     if (createfirstnamekey.currentState!.validate() &&
@@ -954,8 +974,11 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
         createphonekey.currentState!.validate() &&
         createdepartmentkey.currentState!.validate() &&
         createyearkey.currentState!.validate()) {
+      String profilephotourl =
+          'https://firebasestorage.googleapis.com/v0/b/myapp-2bd7a.appspot.com/o/images%2FProfile%2FDefaultProfilePhoto%2Fldpr_logo.png?alt=media&token=86477a33-6c6c-4dcc-b9e1-b70529bfbc45';
       await FirebaseFirestore.instance.collection("Teacher").doc(id).set(
         {
+          'Profile Photo': profilephotourl.toString(),
           'First Name': firstnamecontroller.text.toString(),
           'Midle Name': midlenamecontroller.text.toString(),
           'Last Name': lastnamecontroller.text.toString(),
@@ -967,7 +990,13 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
           'Account Type': accounttype.toString(),
         },
       ).whenComplete(
-        () {
+        () async {
+          try {
+            await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                email: emailidcontroller.text.toString(), password: '123456');
+          } catch (e) {
+            return;
+          }
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -980,6 +1009,7 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
       );
     }
   }
+
 // method of enrollment lsit
   dropdownenrollmentlist(
       BuildContext context,
@@ -1065,6 +1095,7 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
       ],
     );
   }
+
 // method of gettin teacher details
   Future getteacherdetail(String id) async {
     await FirebaseFirestore.instance.collection("Teacher").doc(id).get().then(
@@ -1085,6 +1116,7 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
       },
     );
   }
+
 // delete teacher method
   Future deleteteacher(String id) async {
     await FirebaseFirestore.instance

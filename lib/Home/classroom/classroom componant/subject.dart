@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_app/variable.dart';
-
+import 'package:my_app/utils/constant/variable.dart';
 class Subject extends StatefulWidget {
   const Subject({super.key});
 

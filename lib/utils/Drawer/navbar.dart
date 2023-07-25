@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:my_app/adminpage.dart';
-import 'package:my_app/choise.dart';
-import 'package:my_app/constants.dart';
 import 'package:my_app/main.dart';
+import 'package:my_app/utils/Admin/adminpage.dart';
+import 'package:my_app/utils/Drawer/courses/courses.dart';
+import 'package:my_app/utils/Drawer/studentlist/studentlist.dart';
+import 'package:my_app/utils/Drawer/teacherlist/teacherlist.dart';
+import 'package:my_app/utils/constant/constants.dart';
+import 'package:my_app/utils/login/choise.dart';
 
 void main(List<String> args) {
   runApp(
@@ -26,6 +29,7 @@ class _NavbarState extends State<Navbar> {
   String mname = '';
   String mail = '';
   String type = '';
+  String profileimageurl = '';
 
   @override
   void initState() {
@@ -54,14 +58,8 @@ class _NavbarState extends State<Navbar> {
               ),
             ),
             currentAccountPicture: CircleAvatar(
-              child: ClipOval(
-                child: Image.asset(
-                  "assets/edited_darshil.jpg",
-                  fit: BoxFit.cover,
-                  height: 250,
-                  width: 250,
-                ),
-              ),
+              backgroundImage: NetworkImage(profileimageurl.toString()),
+              backgroundColor: Colors.transparent,
             ),
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -70,15 +68,67 @@ class _NavbarState extends State<Navbar> {
               ),
             ),
           ),
-          ListTile(
-            onTap: () {},
-            leading: Icon(
-              Icons.info,
-              size: 27,
+          Visibility(
+            visible: uType == 'Admin',
+            child: ListTile(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Courses(),
+                  ),
+                );
+              },
+              leading: Icon(
+                Icons.info,
+                size: 27,
+              ),
+              title: Text(
+                "Courses",
+                style: TextStyle(fontSize: 17),
+              ),
             ),
-            title: Text(
-              "About",
-              style: TextStyle(fontSize: 17),
+          ),
+          Visibility(
+            visible: uType == 'Admin',
+            child: ListTile(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TeacherList(),
+                  ),
+                );
+              },
+              leading: Icon(
+                Icons.info,
+                size: 27,
+              ),
+              title: Text(
+                "Teachers",
+                style: TextStyle(fontSize: 17),
+              ),
+            ),
+          ),
+          Visibility(
+            visible: uType == 'Admin',
+            child: ListTile(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => StudentsList(),
+                  ),
+                );
+              },
+              leading: Icon(
+                Icons.info,
+                size: 27,
+              ),
+              title: Text(
+                "Students",
+                style: TextStyle(fontSize: 17),
+              ),
             ),
           ),
           Visibility(
@@ -159,6 +209,7 @@ class _NavbarState extends State<Navbar> {
           lname = snapshot.data()!['Last Name'];
           mail = snapshot.data()!['Email'];
           type = snapshot.data()!['Account Type'];
+          profileimageurl = snapshot.data()!['Profile Photo'];
         });
       }
     });

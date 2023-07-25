@@ -1,8 +1,13 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:my_app/choise.dart';
-import 'package:my_app/constants.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:my_app/utils/constant/constants.dart';
+import 'package:my_app/utils/login/choise.dart';
+// import 'package:url_launcher/url_launcher.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -29,6 +34,7 @@ class _ProfileState extends State<Profile> {
   String accounttype = '';
   String teacherid = '';
   String adminid = '';
+  String profileimageurl = '';
 
   @override
   void initState() {
@@ -36,6 +42,12 @@ class _ProfileState extends State<Profile> {
     //getting login user data
     userData();
   }
+
+  File? profileimage;
+
+  final ImagePicker _picker = ImagePicker();
+  String profilephotourl = '';
+  String profileurl = '';
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +60,9 @@ class _ProfileState extends State<Profile> {
               height: 30,
             ),
             //profile photo
+
             profileImage(context),
+
             //profile field of user first name,midle name,last name
             Visibility(
               child: Column(
@@ -57,6 +71,7 @@ class _ProfileState extends State<Profile> {
                 ],
               ),
             ),
+
             //profile field if user type is student
             Visibility(
               visible: uType == 'Student',
@@ -176,6 +191,7 @@ class _ProfileState extends State<Profile> {
       ],
     );
   }
+
 //get login user data method
   Future userData() async {
     await FirebaseFirestore.instance.collection(uType).doc(uId).get().then(
@@ -201,6 +217,7 @@ class _ProfileState extends State<Profile> {
               phone = snapshot.data()!['Phone'];
               year = snapshot.data()!['Year'];
               accounttype = snapshot.data()!['Account Type'];
+              profileimageurl = snapshot.data()!['Profile Photo'];
             },
           );
           setState(() {});
@@ -208,82 +225,186 @@ class _ProfileState extends State<Profile> {
       },
     );
   }
-}
-//profile image method
-profileImage(BuildContext context) {
-  return Stack(
-    children: [
-      const Center(
-        child: CircleAvatar(
-          radius: 80,
-          backgroundImage: AssetImage("assets/edited_darshil.jpg"),
+
+  //profile image method
+  profileImage(BuildContext context) {
+    return Stack(
+      children: [
+        Center(
+          child: CircleAvatar(
+            radius: 80,
+            backgroundColor: Colors.white,
+            backgroundImage: NetworkImage(
+              profileimageurl.toString(),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 120, left: 230),
+          child: Container(
+            decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                    width: 8, color: const Color.fromARGB(255, 82, 165, 232)),
+                color: const Color.fromARGB(255, 82, 165, 232)),
+            child: InkWell(
+              child: const Icon(
+                Icons.edit,
+                size: 30,
+                color: Colors.white,
+              ),
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) => showAlert(context),
+                );
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+//change profile image method
+  showAlert(BuildContext context) {
+    return AlertDialog(
+      title: const Center(
+        child: Text(
+          "Choose Profile Photo",
         ),
       ),
-      Padding(
-        padding: const EdgeInsets.only(top: 120, left: 230),
-        child: Container(
-          decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                  width: 8, color: const Color.fromARGB(255, 82, 165, 232)),
-              color: const Color.fromARGB(255, 82, 165, 232)),
-          child: InkWell(
-            child: const Icon(
-              Icons.edit,
-              size: 30,
-              color: Colors.white,
-            ),
-            onTap: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) => showAlert(context),
-              );
-            },
+      content: IconButton(
+        onPressed: () {},
+        icon: Padding(
+          padding: const EdgeInsets.only(left: 50, right: 50),
+          child: Row(
+            children: [
+              InkWell(
+                onTap: () {
+                  gallery();
+                },
+                child: const Icon(
+                  Icons.file_upload_outlined,
+                  size: 35,
+                ),
+              ),
+              const SizedBox(
+                width: 30,
+              ),
+              InkWell(
+                onTap: () {
+                  camera();
+                },
+                child: Icon(
+                  Icons.camera,
+                  size: 35,
+                ),
+              )
+            ],
           ),
         ),
       ),
-    ],
-  );
-}
-//change profile image method
-showAlert(BuildContext context) {
-  return AlertDialog(
-    title: const Center(
-      child: Text(
-        "Choose Profile Photo",
-      ),
-    ),
-    content: IconButton(
-      onPressed: () {},
-      icon: Padding(
-        padding: const EdgeInsets.only(left: 50, right: 50),
-        child: Row(
-          children: [
-            InkWell(
-              onTap: () {
-                fileupload();
-              },
-              child: const Icon(
-                Icons.file_upload_outlined,
-                size: 35,
-              ),
-            ),
-            const SizedBox(
-              width: 30,
-            ),
-            const InkWell(
-              child: Icon(
-                Icons.camera,
-                size: 35,
-              ),
-            )
-          ],
-        ),
-      ),
-    ),
-  );
-}
+    );
+  }
 
-fileupload() {
-  return Colors.black;
+  Future gallery() async {
+    final pickedfile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedfile != null) {
+      setState(
+        () {
+          profileimage = File(pickedfile.path);
+        },
+      );
+      try {
+        if (uType == 'Student') {
+          final file = File(profileimage!.path);
+          final storageref = FirebaseStorage.instance.ref().child(
+              'images/Profile/StudentProfilePhoto/${enrollment.toString()}');
+          storageref.putFile(file).whenComplete(
+            () async {
+              profileurl = await FirebaseStorage.instance
+                  .ref()
+                  .child(
+                      'images/Profile/StudentProfilePhoto/${enrollment.toString()}')
+                  .getDownloadURL()
+                  .whenComplete(() {});
+              setState(() {
+                profileimageurl = profileurl;
+              });
+              set();
+            },
+          );
+        } else if (uType == 'Teacher') {
+          final file = File(profileimage!.path);
+          final storageref = FirebaseStorage.instance.ref().child(
+              'images/Profile/TeacherProfilePhoto/${teacherid.toString()}');
+          storageref.putFile(file).whenComplete(
+            () async {
+              profileurl = await FirebaseStorage.instance
+                  .ref()
+                  .child(
+                      'images/Profile/TeacherProfilePhoto/${teacherid.toString()}')
+                  .getDownloadURL()
+                  .whenComplete(() {});
+              setState(() {
+                profileimageurl = profileurl;
+              });
+              set();
+            },
+          );
+        } else if (uType == 'Admin') {
+          final file = File(profileimage!.path);
+          final storageref = FirebaseStorage.instance
+              .ref()
+              .child('images/Profile/AdminProfilePhoto/${adminid.toString()}');
+          storageref.putFile(file).whenComplete(
+            () async {
+              profileurl = await FirebaseStorage.instance
+                  .ref()
+                  .child(
+                      'images/Profile/AdminProfilePhoto/${adminid.toString()}')
+                  .getDownloadURL()
+                  .whenComplete(() {});
+              setState(() {
+                profileimageurl = profileurl;
+              });
+              set();
+            },
+          );
+        }
+      } catch (e) {
+        return e;
+      }
+      Navigator.pop(context);
+    }
+  }
+
+  Future camera() async {
+    final pickedfile = await _picker.pickImage(source: ImageSource.camera);
+    if (pickedfile != null) {
+      setState(() {
+        profileimage = File(pickedfile.path);
+      });
+    }
+  }
+
+  Future set() async {
+    return await FirebaseFirestore.instance.collection(uType).doc(uId).update(
+      {
+        'Profile Photo': profileimageurl.toString(),
+        'Account Type': accounttype.toString(),
+        'Branch': course.toString(),
+        'Email': mail.toString(),
+        'Enrollment No': enrollment.toString(),
+        'First Name': fname.toString(),
+        'Midle Name': mname.toString(),
+        'Last Name': lname.toString(),
+        'Phone': phone.toString(),
+        'Semester': semester.toString(),
+        'Year': year.toString(),
+      },
+    );
+    // setState(() {});
+  }
 }

@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_textfield/dropdown_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 class Courses extends StatefulWidget {
   const Courses({super.key});
@@ -50,7 +49,8 @@ class _CoursesState extends State<Courses> {
                 semester, true, "Select Semester", semesterkey, validate2),
             if (branchname.dropDownValue != null &&
                 semester.dropDownValue != null)
-              getsubjectlist(),
+              getsubjectlist(
+                  semester.dropDownValue!.name, branchname.dropDownValue!.name),
           ],
         ),
       ),
@@ -102,17 +102,6 @@ class _CoursesState extends State<Courses> {
           key: key,
           child: DropDownTextField(
             onChanged: (value) {
-              if (validate == true) {
-                validate = false;
-              } else {
-                validate = true;
-              }
-              if (branchname.dropDownValue != null &&
-                  semester.dropDownValue != null) {
-                // getsubjectlist();
-                print(branchname.dropDownValue!.name);
-                print(semester.dropDownValue!.name);
-              }
               setState(() {});
             },
             isEnabled: bool,
@@ -195,12 +184,13 @@ class _CoursesState extends State<Courses> {
     );
   }
 
-  StreamBuilder getsubjectlist() {
+  StreamBuilder getsubjectlist(String sem, String branch) {
     return StreamBuilder(
+      key: Key(branchname.dropDownValue!.name + semester.dropDownValue!.name),
       stream: FirebaseFirestore.instance
           .collection("Branch")
-          .doc(branchname.dropDownValue!.name)
-          .collection(semester.dropDownValue!.name)
+          .doc(branch)
+          .collection(sem)
           .orderBy('Subject', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
@@ -229,9 +219,6 @@ class _CoursesState extends State<Courses> {
                             10,
                           ),
                         ),
-                        // label: Text(
-                        //   snap['Subject'].toString(),
-                        // ),
                       ),
                     ),
                   ),

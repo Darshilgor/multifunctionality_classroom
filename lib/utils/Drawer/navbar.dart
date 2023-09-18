@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_app/main.dart';
+import 'package:my_app/student_result.dart';
 import 'package:my_app/utils/Admin/adminpage.dart';
 import 'package:my_app/utils/Drawer/courses/courses.dart';
 import 'package:my_app/utils/Drawer/studentlist/studentlist.dart';
@@ -65,6 +66,27 @@ class _NavbarState extends State<Navbar> {
               image: DecorationImage(
                 image: AssetImage("assets/backgroundimage1.jpg"),
                 fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          Visibility(
+            visible: uType == 'Student',
+            child: ListTile(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Result(),
+                  ),
+                );
+              },
+              leading: Icon(
+                Icons.info,
+                size: 27,
+              ),
+              title: Text(
+                "Student Corner",
+                style: TextStyle(fontSize: 17),
               ),
             ),
           ),

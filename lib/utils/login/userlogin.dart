@@ -1,12 +1,15 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_app/Home/forstudent.dart';
 import 'package:my_app/utils/constant/constants.dart';
+
 class UserLogIn extends StatefulWidget {
-  
   final String user; //define user type
   final String idType; //define userlogin id
+  final int studentsemester = 0;
 
   const UserLogIn({super.key, required this.user, required this.idType});
 
@@ -15,10 +18,12 @@ class UserLogIn extends StatefulWidget {
 }
 
 class _UserLogInState extends State<UserLogIn> {
-  TextEditingController idcontroller = TextEditingController();//user id controller
-  TextEditingController passwordcontroller = TextEditingController();//user password controller
+  TextEditingController idcontroller =
+      TextEditingController(); //user id controller
+  TextEditingController passwordcontroller =
+      TextEditingController(); //user password controller
 
-  var emailId = '';
+  var emailId = 'gordarshil2002@gmail.com';
   var password = 'Password';
 
   @override
@@ -111,9 +116,7 @@ class _UserLogInState extends State<UserLogIn> {
                         textStyle: const TextStyle(fontSize: 25),
                       ),
                       onPressed: () async {
-                        await getEmail(widget.user, idcontroller.text);
-
-                        signIn(widget.user, idcontroller.text);
+                        await signIn(widget.user, idcontroller.text);
                       },
                       child: const Text("LogIn"),
                     ),
@@ -128,6 +131,7 @@ class _UserLogInState extends State<UserLogIn> {
       ),
     );
   }
+
   //Login heading
   loginText() {
     return Padding(
@@ -144,6 +148,7 @@ class _UserLogInState extends State<UserLogIn> {
       ),
     );
   }
+
   //Login process method
   Future signIn(String collection, String id) async {
     showDialog(
@@ -154,36 +159,56 @@ class _UserLogInState extends State<UserLogIn> {
         );
       },
     );
+    await getEmail(widget.user, idcontroller.text);
+
     try {
-      await FirebaseAuth.instance
-          .signInWithEmailAndPassword(
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailId,
         password: passwordcontroller.text,
-      )
-          .then(
-        (value) async {
-          Navigator.popUntil(context, (route) => false);
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const ForStudent(),
-            ),
-          );
-          uType = widget.user;
-          uId = idcontroller.text;
-          print(uType);
-          print(uId);
-          await setLocalData(uType.toString(), uId.toString());
-        },
+      );
+
+      Navigator.popUntil(context, (route) => false);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const ForStudent(),
+        ),
       );
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         wrongemailmessage();
       } else if (e.code == 'wrong-password') {
         wrondpassword();
+      } else {
+        print(e);
       }
     }
+    uType = widget.user;
+    uId = idcontroller.text;
+
+    print(uType);
+    print(uId);
+    await setLocalData(uType.toString(), uId.toString());
+    FirebaseFirestore.instance
+        .collection(uType.toString())
+        .doc(uId.toString())
+        .get()
+        .then((value) {
+      userfirstname = value['First Name'];
+      userlastname = value['Last Name'];
+      userprofilephoto = value['Profile Photo'];
+      if (uType == 'Student') {
+        studentsemester = value['Semester'];
+      }
+      print(userfirstname);
+    });
+    FirebaseFirestore.instance.collection('Classes').doc('E').get().then(
+      (value) {
+        className = value['Class Name'];
+      },
+    );
   }
+
   //Wrong email method
   void wrongemailmessage() {
     showDialog(
@@ -194,6 +219,7 @@ class _UserLogInState extends State<UserLogIn> {
           );
         });
   }
+
   //Wrong password method
   void wrondpassword() {
     showDialog(
@@ -205,6 +231,7 @@ class _UserLogInState extends State<UserLogIn> {
       },
     );
   }
+
   //Backbutton method
   backButton() {
     return Padding(
@@ -221,13 +248,20 @@ class _UserLogInState extends State<UserLogIn> {
       ),
     );
   }
+
   //getting use email method
   Future getEmail(String collection, String id) async {
-    await FirebaseFirestore.instance
-        .collection(collection)
-        .doc(id)
-        .get()
-        .then((value) => emailId = value['Email'])
-        .catchError((error) => wrongemailmessage());
+    try {
+      await FirebaseFirestore.instance
+          .collection(collection)
+          .doc(id)
+          .get()
+          .then((value) {
+        emailId = value['Email'];
+        setState(() {});
+      });
+    } on FirebaseException catch (e) {
+      print(e.message);
+    }
   }
 }

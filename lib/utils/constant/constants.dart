@@ -4,6 +4,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 String uType = '';
 String uId = '';
+String userfirstname = '';
+String userlastname = '';
+String className = '';
+String userprofilephoto = '';
 String eventTitle = '';
 String eventCoordinatorName = '';
 String eventCoordinatorEmail = '';
@@ -13,6 +17,8 @@ String? eventLink;
 String eventCoverPhoto = '';
 Timestamp? timestamp;
 bool isLoading = false;
+int studentsemester = 0;
+
 //store current login usertype and userid
 Future setLocalData(String usertype, String userid) async {
   SharedPreferences pref = await SharedPreferences.getInstance();
@@ -33,3 +39,14 @@ Future removeLocalData() async {
   await pref.remove('uType');
   await pref.remove('uId');
 }
+
+// Future setdata() async {
+//   if (uType == 'Student') {
+//     await FirebaseFirestore.instance.collection(uType).doc(uId).get().then(
+//       (value) {
+//         studentsemester = value['Semester'] as int;
+//       },
+//     );
+//   }
+//   print(studentsemester);
+// }

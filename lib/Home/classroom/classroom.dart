@@ -56,9 +56,13 @@ class Classroom extends StatelessWidget {
             ),
           ],
         ),
-        body: const TabBarView(children: <Widget>[
+        body: TabBarView(children: <Widget>[
           Center(
-            child: Text("Class Stream"),
+            child: Text("Class Stream"),            
+            // child: Text("Class Stream"),
+            // child: ClassStream(
+            //   className: className.toString(),
+            //   getKey: DateTime.now().toString(),),
           ),
           Center(
             child: Subject(),

@@ -604,7 +604,7 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
           (element) {
             setState(() {
               semesters.add(
-                element['Semester'],
+                element['Semester No'],
               );
             });
           },

@@ -164,11 +164,12 @@ class _StudentsListState extends State<StudentsList> {
     );
   }
 
-  getteacherlist() {
+  StreamBuilder getteacherlist() {
     String firstname = '';
     String midlename = '';
     String lastname = '';
     return StreamBuilder(
+      key: Key(branchname.dropDownValue!.name + semester.dropDownValue!.name),
       stream: FirebaseFirestore.instance.collection('Student').snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
@@ -178,25 +179,29 @@ class _StudentsListState extends State<StudentsList> {
           children: snapshot.data!.docs.map<Widget>(
             (snap) {
               if (snap['Branch'] == branchname.dropDownValue!.name) {
-                firstname = snap['First Name'];
-                midlename = snap['Midle Name'];
-                lastname = snap['Last Name'];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 15),
-                  child: InkWell(
-                    child: TextFormField(
-                      enabled: false,
-                      initialValue: '$firstname $midlename $lastname',
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            10,
+                if (snap['Semester'] == semester.dropDownValue!.name) {
+                  firstname = snap['First Name'];
+                  midlename = snap['Midle Name'];
+                  lastname = snap['Last Name'];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 15),
+                    child: InkWell(
+                      child: TextFormField(
+                        enabled: false,
+                        initialValue: '$firstname $midlename $lastname',
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(
+                              10,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                );
+                  );
+                } else {
+                  return Text("No Teacher is in this Branch");
+                }
               } else {
                 return Text("No Teacher is in this Branch");
               }

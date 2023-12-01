@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_textfield/dropdown_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:my_app/utils/Admin/adminpage.dart';
-import 'package:my_app/utils/constant/constants.dart';
 import 'package:my_app/utils/constant/getlist.dart';
 
 class CreateUpdateClass extends StatefulWidget {
@@ -29,13 +28,12 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
 
 //different textformfield form key
   final loginformkey = GlobalKey<FormState>();
-  final classnametextkey = GlobalKey<FormState>();
-  final classnamedropkey = GlobalKey<FormState>();
-  final branchnamekey = GlobalKey<FormState>();
-  final semesterkey = GlobalKey<FormState>();
-  final startingyearkey = GlobalKey<FormState>();
-  final endingyearkey = GlobalKey<FormState>();
-  final mentorkey = GlobalKey<FormState>();
+  final createclassnamekey = GlobalKey<FormState>();
+  final updateclassnamekey = GlobalKey<FormState>();
+  final createbranchnamekey = GlobalKey<FormState>();
+  final updatebranchnamekey = GlobalKey<FormState>();
+  final creatementornamekey = GlobalKey<FormState>();
+  final updatementornamekey = GlobalKey<FormState>();
 
   final String collectionvalue = 'Classes';
 
@@ -100,7 +98,7 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
                 if (widget.title == 'Create Class')
                   //textformfield for enter classname in create class
                   Form(
-                    key: classnametextkey,
+                    key: createclassnamekey,
                     child: textformfield(
                         context,
                         classnamecontroller,
@@ -109,7 +107,11 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
                         "Please enter the class name"),
                   ),
                 if (widget.title == 'Update Class')
-                  dropdowntextfield(context, "Select Branch", branchname, true),
+                  Form(
+                    key: updatebranchnamekey,
+                    child: dropdowntextfield(
+                        context, "Select Branch", branchname, true),
+                  ),
                 SizedBox(
                   height: 15,
                 ),
@@ -117,9 +119,13 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
                   Text(branchname.dropDownValue!.name),
                 if (widget.title == 'Update Class' &&
                     branchname.dropDownValue != null)
+
                   // dropdowntextformfield for select classname in update class
-                  classnamedropdownmenu(
-                      context, "Select class name", classname, true),
+                  Form(
+                    key: updateclassnamekey,
+                    child: classnamedropdownmenu(
+                        context, "Select class name", classname, true),
+                  ),
                 SizedBox(
                   height: 15,
                 ),
@@ -129,7 +135,7 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
                       if (widget.title == 'Create Class')
                         //dropdowntextformfield for select branch in create clss
                         Form(
-                          key: branchnamekey,
+                          key: createbranchnamekey,
                           child: Column(
                             children: [
                               dropdowntextfield(
@@ -253,7 +259,7 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
                       if (widget.title == 'Create Class')
                         //dropdowntextformfield for select mentor in crete class
                         Form(
-                          key: mentorkey,
+                          key: creatementornamekey,
                           child: Column(
                             children: [
                               dropdowntextfield(
@@ -262,16 +268,12 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
                           ),
                         ),
                       // dropdowntextformfield for select mentor in update class
-                      Visibility(
-                        visible: visibility,
-                        child: Form(
-                          key: mentorkey,
-                          child: Column(
-                            children: [
-                              dropdowntextfield(
-                                  context, "Select Mentor", mentorname, true),
-                            ],
-                          ),
+                      Form(
+                        key: updatementornamekey,
+                        child: Visibility(
+                          visible: visibility,
+                          child: dropdowntextfield(
+                              context, "Select Mentor", mentorname, true),
                         ),
                       ),
                       if (mentorname.dropDownValue != null)
@@ -279,18 +281,27 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
                       SizedBox(
                         height: 25,
                       ),
-                      // if (widget.title == 'Create Class')
-                      //   clearsubmitbutton(branchname.dropDownValue!.name
-                      //       .toString()), //clear submit button in create class
-                      // Visibility(
-                      //   visible: visibility,
-                      //   child: Column(
-                      //     children: [
-                      //       if (widget.title == 'Update Class')
-                      //         cleardeletesubmitbutton(), //clear delete update button in update class
-                      //     ],
-                      //   ),
-                      // )
+                      if (widget.title == 'Create Class' &&
+                          classnamecontroller.text.toString() != null &&
+                          branchname.dropDownValue != null &&
+                          mentorname.dropDownValue != null)
+                        clearsubmitbutton(
+                            classnamecontroller.text.toString(),
+                            branchname.dropDownValue!.name,
+                            mentorname.dropDownValue!
+                                .name), //clear submit button in create class
+                      Visibility(
+                        visible: visibility,
+                        child: (widget.title == 'Update Class' &&
+                                classname.dropDownValue != null &&
+                                branchname.dropDownValue != null &&
+                                mentorname.dropDownValue != null)
+                            ? cleardeletesubmitbutton(
+                                branchname.dropDownValue!.name,
+                                classname.dropDownValue!.name,
+                                mentorname.dropDownValue!.name)
+                            : Text('Something went wrong'),
+                      )
                     ],
                   ),
                 ),
@@ -507,17 +518,18 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
   // }
 
 //button design method
-  button(BuildContext context, String labeltext, String branchname) {
+  button(BuildContext context, String labeltext, String branchname,
+      String classname, String mentorname) {
     return ElevatedButton(
       onPressed: () {
         if (labeltext == 'Clear')
           clear();
         else if (labeltext == 'Delete') {
-          deleteclass();
+          deleteclass(context, branchname, classname);
         } else if (labeltext == 'Update') {
-          updateclassdetails(context);
+          updateclassdetails(context, branchname, classname, mentorname);
         } else {
-          submit(context, classnamecontroller.text.toString(), branchname);
+          submit(context, classname, branchname, mentorname);
         }
       },
       child: Container(
@@ -548,10 +560,11 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
   }
 
 //submit process method
-  Future submit(context, String id, String branchname) async {
-    if (classnametextkey.currentState!.validate() &&
-        branchnamekey.currentState!.validate() &&
-        mentorkey.currentState!.validate()) {
+  Future submit(
+      context, String id, String branchname, String mentorname) async {
+    if (createclassnamekey.currentState!.validate() &&
+        createbranchnamekey.currentState!.validate() &&
+        creatementornamekey.currentState!.validate()) {
       await FirebaseFirestore.instance
           .collection('Branch')
           .doc(branchname)
@@ -561,7 +574,7 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
         {
           'Class Name': id,
           'Branch': branchname,
-          'Mentor': mentorname.dropDownValue!.name.toString(),
+          'Mentor': mentorname,
         },
       ).then(
         (value) {
@@ -718,32 +731,19 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
   // }
 
 //method of update class details
-  Future updateclassdetails(BuildContext context) async {
-    if (classnamedropkey.currentState!.validate() &&
-        branchnamekey.currentState!.validate() &&
-        semesterkey.currentState!.validate() &&
-        startingyearkey.currentState!.validate() &&
-        endingyearkey.currentState!.validate() &&
-        mentorkey.currentState!.validate()) {
+  Future updateclassdetails(BuildContext context, String branchname,
+      String classname, String mentorname) async {
+    if (updateclassnamekey.currentState!.validate() &&
+        updatebranchnamekey.currentState!.validate() &&
+        updatementornamekey.currentState!.validate()) {
       await FirebaseFirestore.instance
-          .collection(collectionvalue)
-          .doc(classname.dropDownValue!.name.toString())
-          .get()
-          .then(
-        (snapshot) {
-          if (snapshot.exists) {
-            FirebaseFirestore.instance
-                .collection(collectionvalue)
-                .doc(classname.dropDownValue!.name.toString())
-                .update(
-              {
-                'Branch': branchname.dropDownValue!.name.toString(),
-                'Mentor': mentorname.dropDownValue!.name.toString(),
-                'Semester': semester.dropDownValue!.name.toString(),
-              },
-            );
-          }
-          ;
+          .collection('Branch')
+          .doc(branchname)
+          .collection('Classes')
+          .doc(classname)
+          .update(
+        {
+          'Mentor': mentorname,
         },
       ).whenComplete(
         () {
@@ -759,11 +759,14 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
   }
 
 //delete class method
-  Future deleteclass() async {
-    if (classnamedropkey.currentState!.validate()) {
+  Future deleteclass(
+      BuildContext context, String branchname, String classname) async {
+    if (updateclassnamekey.currentState!.validate()) {
       await FirebaseFirestore.instance
-          .collection("Classes")
-          .doc(classname.dropDownValue!.name.toString())
+          .collection('Branch')
+          .doc(branchname)
+          .collection('Classes')
+          .doc(classname)
           .delete()
           .whenComplete(
         () {
@@ -779,32 +782,32 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
   }
 
 //clear submit button method
-  clearsubmitbutton(String branchname) {
+  clearsubmitbutton(String classname, String branchname, String mentorname) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        button(context, "Clear", branchname),
+        button(context, "Clear", branchname, classname, mentorname),
         SizedBox(
           width: 50,
         ),
-        button(context, "Submit", branchname),
+        button(context, "Submit", branchname, classname, mentorname),
       ],
     );
   }
 
 //clear submit update button method
-  cleardeletesubmitbutton() {
+  cleardeletesubmitbutton(
+      String branchname, String classname, String mentorname) {
     return Column(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            button(context, "Clear", branchname.dropDownValue!.name.toString()),
+            button(context, "Clear", branchname, classname, mentorname),
             SizedBox(
               width: 50,
             ),
-            button(
-                context, "Delete", branchname.dropDownValue!.name.toString()),
+            button(context, "Delete", branchname, classname, mentorname),
           ],
         ),
         SizedBox(
@@ -813,8 +816,7 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            button(
-                context, "Update", branchname.dropDownValue!.name.toString()),
+            button(context, "Update", branchname, classname, mentorname),
           ],
         )
       ],

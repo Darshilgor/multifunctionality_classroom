@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -23,15 +21,15 @@ class _UserLogInState extends State<UserLogIn> {
   TextEditingController passwordcontroller =
       TextEditingController(); //user password controller
 
-  var emailId = 'gordarshil2002@gmail.com';
-  var password = 'Password';
+  var emailId = '';
+  var password = '';
 
-  @override
-  void dispose() {
-    idcontroller.dispose();
-    passwordcontroller.dispose();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   idcontroller.dispose();
+  //   passwordcontroller.dispose();
+  //   super.dispose();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -188,25 +186,41 @@ class _UserLogInState extends State<UserLogIn> {
 
     print(uType);
     print(uId);
+
     await setLocalData(uType.toString(), uId.toString());
-    FirebaseFirestore.instance
-        .collection(uType.toString())
-        .doc(uId.toString())
-        .get()
-        .then((value) {
-      userfirstname = value['First Name'];
-      userlastname = value['Last Name'];
-      userprofilephoto = value['Profile Photo'];
-      if (uType == 'Student') {
-        studentsemester = value['Semester'];
-      }
-      print(userfirstname);
-    });
-    FirebaseFirestore.instance.collection('Classes').doc('E').get().then(
-      (value) {
-        className = value['Class Name'];
-      },
-    );
+
+    // FirebaseFirestore.instance
+    //     .collection(uType.toString())
+    //     .doc(uId.toString())
+    //     .get()
+    //     .then((value) {
+    //   firstname = value['First Name'];
+    //   lastname = value['Last Name'];
+    //   profilephoto = value['Profile Photo'];
+    //   if (uType == 'Student') {
+    //     studentsemester = value['Semester'];
+    //   }
+    // setState(() {});
+    // print(spi1);
+    // print(spi2);
+    // print(spi3);
+    // print(spi4);
+    print(firstname);
+    print(midlename);
+    print(lastname);
+    print(branch);
+    print(cpi);
+    print(phone);
+    print(spilist);
+    // print(enrollmentno);
+    // print(semester);
+    // print("Student Semester IS $studentsemester");
+    // });
+    // FirebaseFirestore.instance.collection('Classes').doc('E').get().then(
+    //   (value) {
+    //     className = value['Class Name'];
+    //   },
+    // );
   }
 
   //Wrong email method
@@ -256,10 +270,12 @@ class _UserLogInState extends State<UserLogIn> {
           .collection(collection)
           .doc(id)
           .get()
-          .then((value) {
-        emailId = value['Email'];
-        setState(() {});
-      });
+          .then(
+        (value) {
+          emailId = value['Email'];
+        },
+      );
+      setState(() {});
     } on FirebaseException catch (e) {
       print(e.message);
     }

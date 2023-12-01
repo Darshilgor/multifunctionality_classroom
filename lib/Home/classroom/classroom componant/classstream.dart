@@ -199,8 +199,8 @@ class _ClassStreamState extends State<ClassStream> {
     // Send message to firebase realtime database.
     firebaseMsgDbRef.child(widget.className).push().set({
       'senderId': this.user!.uid,
-      'senderName': userfirstname + ' ' + userlastname,
-      'senderPhotoUrl': userprofilephoto,
+      'senderName': firstname + ' ' + lastname,
+      'senderPhotoUrl': profilephoto,
       'text': text,
       'time': postTime.format('D, M j, H:i'),
     });

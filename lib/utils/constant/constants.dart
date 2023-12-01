@@ -1,13 +1,39 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 
 String uType = '';
 String uId = '';
-String userfirstname = '';
-String userlastname = '';
+String accounttype = '';
+String branch = '';
+double cpi = 0;
 String className = '';
-String userprofilephoto = '';
+String department = '';
+String email = '';
+String enrollmentno = '';
+String teacherid = '';
+String adminid = '';
+String firstname = '';
+String midlename = '';
+String lastname = '';
+late num phone;
+String profilephoto = '';
+
+//in future uncomment if required.
+// double spi1 = 0;
+// late double spi2;
+// late double spi3;
+// late double spi4;
+// late double spi5;
+// late double spi6;
+// late double spi7;
+// late double spi8;
+
+int semester = 0;
+late int year;
+
+List<double> spilist = [];
+List<String> getbranchlist = [];
 String eventTitle = '';
 String eventCoordinatorName = '';
 String eventCoordinatorEmail = '';
@@ -16,14 +42,49 @@ DateTime? eventDueDate;
 String? eventLink;
 String eventCoverPhoto = '';
 Timestamp? timestamp;
-bool isLoading = false;
-int studentsemester = 0;
 
 //store current login usertype and userid
 Future setLocalData(String usertype, String userid) async {
-  SharedPreferences pref = await SharedPreferences.getInstance();
-  pref.setString('uType', usertype);
-  pref.setString('uId', userid);
+  int i = 1;
+
+  // SharedPreferences pref = await SharedPreferences.getInstance(); //use for set data in local variable.
+
+  return await FirebaseFirestore.instance
+      .collection(usertype)
+      .doc(userid)
+      .get()
+      .then(
+    (DocumentSnapshot snapshot) {
+      if (snapshot.exists) {
+        accounttype = snapshot['Account Type'];
+        email = snapshot['Email'];
+        firstname = snapshot['First Name'];
+        midlename = snapshot['Midle Name'];
+        lastname = snapshot['Last Name'];
+        profilephoto = snapshot['Profile Photo'];
+        phone = snapshot['Phone'];
+        if (usertype == 'Teacher') {
+          department = snapshot['Department'];
+          teacherid = snapshot['TID'];
+        }
+        if (usertype == 'Student') {
+          branch = snapshot['Branch'];
+          cpi = snapshot['CPI'].toDouble();
+          className = snapshot['Class'];
+          enrollmentno = snapshot['Enrollment No'];
+          year = snapshot['Year'];
+          semester = snapshot['Semester'];
+          for (int i = 1; i <= semester; i++) {
+            spilist.add(snapshot['SPI$i']);
+          }
+        }
+        if (usertype == 'Admin') {
+          department = snapshot['Department'];
+          adminid = snapshot['AID'];
+        }
+      }
+    },
+  );
 }
 
 //get current login usertype and userid

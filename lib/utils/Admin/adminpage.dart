@@ -3,6 +3,7 @@ import 'package:my_app/utils/Admin/Admin%20Pages/addevent.dart';
 import 'package:my_app/utils/Admin/Admin%20Pages/createupdateclass.dart';
 import 'package:my_app/utils/Admin/Admin%20Pages/createupdatestudent.dart';
 import 'package:my_app/utils/Admin/Admin%20Pages/createupdateteacher.dart';
+import 'package:my_app/utils/Admin/Admin%20Pages/enterresult.dart';
 import 'package:my_app/utils/Admin/Admin%20Pages/updateevent.dart';
 
 class AdminPage extends StatefulWidget {
@@ -21,9 +22,14 @@ class _AdminPageState extends State<AdminPage> {
     'Create Event',
     'Update Event',
     'Create Class',
-    'Select Class',
+    'Update Class',
+    'Enter Result',
   ];
   List adminicon = [
+    const Icon(
+      Icons.add,
+      size: 50,
+    ),
     const Icon(
       Icons.add,
       size: 50,
@@ -66,6 +72,7 @@ class _AdminPageState extends State<AdminPage> {
     UpdateEvent(title: 'Update Event'),
     CreateUpdateClass(title: 'Create Class'),
     CreateUpdateClass(title: 'Update Class'),
+    EnterResult(title: 'Enter Result'),
   ];
 
   @override
@@ -82,7 +89,7 @@ class _AdminPageState extends State<AdminPage> {
         ),
         //define admin page item using gridview builder
         body: GridView.builder(
-          itemCount: 8,
+          itemCount: admintext.length,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2),
           itemBuilder: (context, index) {

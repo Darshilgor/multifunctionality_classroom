@@ -3,6 +3,7 @@ import 'package:dropdown_textfield/dropdown_textfield.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_app/utils/Admin/adminpage.dart';
+import 'package:my_app/utils/constant/getlist.dart';
 
 class CreateUpdateTeacher extends StatefulWidget {
   final String title;
@@ -24,11 +25,11 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
   TextEditingController phonecontroller = TextEditingController();
   TextEditingController semestercontroller = TextEditingController();
   TextEditingController yearcontroller = TextEditingController();
-//teacher id dropdowntextfield
-  List<String> teacherids = [];
-  List<DropDownValueModel> teacheridlist = [];
+  //teacher id dropdowntextfield
   late SingleValueDropDownController teacherid;
-//different textfield key
+  // class
+  late SingleValueDropDownController classvalue;
+  //different textfield key
   final createfirstnamekey = GlobalKey<FormState>();
   final updatefirstnamekey = GlobalKey<FormState>();
   final createmidlenamekey = GlobalKey<FormState>();
@@ -41,48 +42,34 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
   final updatephonekey = GlobalKey<FormState>();
   final createdepartmentkey = GlobalKey<FormState>();
   final updatedepartmentkey = GlobalKey<FormState>();
-  final createyearkey = GlobalKey<FormState>();
-  final updateyearkey = GlobalKey<FormState>();
   final createteacheridkey = GlobalKey<FormState>();
   final updateteacheridkey = GlobalKey<FormState>();
+  final createclasskey = GlobalKey<FormState>();
+  final updateclasskey = GlobalKey<FormState>();
+
 //department dropdowntextfield
-  List<String> departments = [];
-  List<DropDownValueModel> departmentlist = [];
+
   late SingleValueDropDownController department;
 //use getting value form database and store in controller
   String firstnamevalue = '';
   String midlenamevalue = '';
   String lastnamevalue = '';
   String emailidvalue = '';
-  String phonenovalue = '';
+  num phonenovalue = 0;
   String departmentvalue = '';
   String yearvalue = '';
   String teacheridvalue = '';
-//year dropdowntextfield
-  List<String> years = [];
-  List<DropDownValueModel> yearlist = [];
-  late SingleValueDropDownController year;
+  String classes = '';
+
   String accounttype = 'Teacher';
   bool visible = false;
-
+  GetList getlist = GetList();
   @override
   void initState() {
     super.initState();
     teacherid = SingleValueDropDownController();
-    getteachernamelist(); //teacher list
-    getdepartmentlist(); //department list
-    getyearlist(); //year list
-
     department = SingleValueDropDownController();
-    year = SingleValueDropDownController();
-    department = SingleValueDropDownController();
-    teacherid = SingleValueDropDownController();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    teacherid.dispose();
+    classvalue = SingleValueDropDownController();
   }
 
   @override
@@ -106,10 +93,10 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
                     key: updateteacheridkey,
                     child: Column(
                       children: [
+                        // teacherid list in update teacher
                         if (widget.title == 'Update Teacher')
-                          // teacherid list in update teacher
-                          dropdownenrollmentlist(context, "Select teacher id",
-                              teacheridlist, teacherid, true),
+                          dropdownenrollmentlist(
+                              context, "Select teacher id", teacherid, true),
                       ],
                     ),
                   ),
@@ -217,7 +204,6 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
                       ? createteacherdropdown(
                           context,
                           "Select Department",
-                          departmentlist,
                           department,
                           createdepartmentkey,
                           true,
@@ -226,21 +212,27 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
                       : updateteacherdropdown(
                           context,
                           "Select Department",
-                          departmentlist,
                           department,
                           updatedepartmentkey,
                           true,
                           "Select Department",
                           visible),
-                  (widget.title == "Create Teacher")
-                      // year dropdown in create teacher
-                      ? createteacherdropdown(context, "Select Year", yearlist,
-                          year, createyearkey, true, "Select Year")
-                      // year dropdown in update student
-                      : updateteacherdropdown(context, "Select Year", yearlist,
-                          year, updateyearkey, true, "Select Year", visible),
+                  (widget.title == "Create Teacher" &&
+                          department.dropDownValue != null)
+                      // department dropdown in create teacher
+                      ? createteacherdropdown(context, "Select Class",
+                          classvalue, createclasskey, true, "Select Class")
+                      // department dropdown in update teacher
+                      : updateteacherdropdown(
+                          context,
+                          "Select Class",
+                          classvalue,
+                          updateclasskey,
+                          true,
+                          "Select Class",
+                          visible),
                   SizedBox(
-                    height: 20,
+                    height: 10,
                   ),
                   if (widget.title == 'Create Teacher')
                     //clear submit button in create teacher
@@ -330,33 +322,6 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
       const SnackBar(
         content: Text('Data Updated'),
       ),
-    );
-  }
-
-// method of getting teacher-id list
-  Future getteachernamelist() async {
-    await FirebaseFirestore.instance.collection("Teacher").get().then(
-      (QuerySnapshot querysnapshot) {
-        querysnapshot.docs.forEach(
-          (element) {
-            setState(
-              () {
-                teacherids.add(
-                  element["TID"],
-                );
-              },
-            );
-          },
-        );
-        for (int i = 0; i < teacherids.length; i++) {
-          teacheridlist.add(
-            DropDownValueModel(
-              name: teacherids[i],
-              value: teacherids[i],
-            ),
-          );
-        }
-      },
     );
   }
 
@@ -574,6 +539,7 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
         Form(
           key: key,
           child: TextFormField(
+            maxLength: (labeltext == 'Phone No') ? 10 : 1000,
             controller: controller,
             validator: (value) {
               if (firstnamecontroller == null) {
@@ -585,6 +551,7 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
               }
             },
             decoration: InputDecoration(
+              counterText: "",
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 13,
                 vertical: 23,
@@ -625,6 +592,7 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
           child: Form(
             key: key,
             child: TextFormField(
+              maxLength: (labeltext == 'Phone No') ? 10 : 1000,
               controller: controller,
               validator: (value) {
                 if (firstnamecontroller == null) {
@@ -636,6 +604,7 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
                 }
               },
               decoration: InputDecoration(
+                counterText: '',
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 13,
                   vertical: 23,
@@ -665,7 +634,6 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
   createteacherdropdown(
       BuildContext context,
       String errormessage,
-      List<DropDownValueModel> list,
       SingleValueDropDownController controller,
       GlobalKey<FormState> key,
       bool bool,
@@ -674,48 +642,64 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
       children: [
         Form(
           key: key,
-          child: DropDownTextField(
-            isEnabled: bool,
-            dropDownList: list,
-            validator: (value) {
-              if (controller.dropDownValue == null) {
-                return errormessage;
-              } else if (controller.dropDownValue!.name.isEmpty) {
-                return errormessage;
-              } else {
-                return null;
-              }
-            },
-            controller: controller,
-            dropDownItemCount: 5,
-            dropdownRadius: 10,
-            textFieldDecoration: InputDecoration(
-              labelText: labeltext,
-              disabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Colors.grey,
-                ),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  width: 2,
-                  color: Theme.of(context).primaryColor,
-                ),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              errorBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Colors.red,
-                ),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey),
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-          ),
+          child: FutureBuilder(
+              future: (labeltext == 'Select Department')
+                  ? getlist.getdepartmentlist()
+                  : getlist.getclasslist(department.dropDownValue!.name),
+              builder: (context, future) {
+                if (future.hasData) {
+                  List<DropDownValueModel>? list = future.data;
+                  if (list != null) {
+                    return DropDownTextField(
+                      isEnabled: bool,
+                      dropDownList: list,
+                      validator: (value) {
+                        if (controller.dropDownValue == null) {
+                          return errormessage;
+                        } else if (controller.dropDownValue!.name.isEmpty) {
+                          return errormessage;
+                        } else {
+                          return null;
+                        }
+                      },
+                      controller: controller,
+                      dropDownItemCount: 5,
+                      dropdownRadius: 10,
+                      textFieldDecoration: InputDecoration(
+                        labelText: labeltext,
+                        disabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Colors.grey,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            width: 2,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Colors.red,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    );
+                  }
+                }
+                return Center(
+                  child: Text(
+                    "Something went wrong",
+                  ),
+                );
+              }),
         ),
         SizedBox(
           height: 15,
@@ -728,7 +712,6 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
   updateteacherdropdown(
       BuildContext context,
       String errormessage,
-      List<DropDownValueModel> list,
       SingleValueDropDownController controller,
       GlobalKey<FormState> key,
       bool bool,
@@ -740,108 +723,72 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
           visible: visible,
           child: Form(
             key: key,
-            child: DropDownTextField(
-              isEnabled: bool,
-              dropDownList: list,
-              validator: (value) {
-                if (controller.dropDownValue == null) {
-                  return errormessage;
-                } else if (controller.dropDownValue!.name.isEmpty) {
-                  return errormessage;
-                } else {
-                  return null;
-                }
-              },
-              controller: controller,
-              dropDownItemCount: 5,
-              dropdownRadius: 10,
-              textFieldDecoration: InputDecoration(
-                labelText: labeltext,
-                disabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color: Colors.grey,
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    width: 2,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                errorBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color: Colors.red,
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-            ),
+            child: FutureBuilder(
+                future: (labeltext == 'Select Department')
+                    ? getlist.getdepartmentlist()
+                    : (department.dropDownValue != null)
+                        ? getlist.getclasslist(department.dropDownValue!.name)
+                        : getlist.getdepartmentlist(),
+                builder: (context, future) {
+                  if (future.hasData) {
+                    List<DropDownValueModel>? list = future.data;
+                    if (list != null) {
+                      return DropDownTextField(
+                        isEnabled: bool,
+                        dropDownList: list,
+                        validator: (value) {
+                          if (controller.dropDownValue == null) {
+                            return errormessage;
+                          } else if (controller.dropDownValue!.name.isEmpty) {
+                            return errormessage;
+                          } else {
+                            return null;
+                          }
+                        },
+                        controller: controller,
+                        dropDownItemCount: 5,
+                        dropdownRadius: 10,
+                        textFieldDecoration: InputDecoration(
+                          labelText: labeltext,
+                          disabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Colors.grey,
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              width: 2,
+                              color: Theme.of(context).primaryColor,
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Colors.red,
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      );
+                    }
+                  }
+                  return Center(
+                    child: Text(
+                      "Something went wrong",
+                    ),
+                  );
+                }),
           ),
         ),
         SizedBox(
           height: 15,
         ),
       ],
-    );
-  }
-
-// method of getting department list
-  Future getdepartmentlist() async {
-    await FirebaseFirestore.instance.collection("Branch").get().then(
-      (QuerySnapshot snapshot) {
-        snapshot.docs.forEach(
-          (element) {
-            setState(() {
-              departments.add(
-                element['Branch Name'],
-              );
-            });
-          },
-        );
-        for (int i = 0; i < departments.length; i++) {
-          setState(() {
-            departmentlist.add(
-              DropDownValueModel(
-                name: departments[i],
-                value: departments[i],
-              ),
-            );
-          });
-        }
-      },
-    );
-  }
-
-// method of getting year list
-  Future getyearlist() async {
-    await FirebaseFirestore.instance.collection("Year").get().then(
-      (QuerySnapshot snapshot) {
-        snapshot.docs.forEach(
-          (element) {
-            setState(() {
-              years.add(
-                element['Year'],
-              );
-            });
-          },
-        );
-        for (int i = 0; i < years.length; i++) {
-          setState(() {
-            yearlist.add(
-              DropDownValueModel(
-                name: years[i],
-                value: years[i],
-              ),
-            );
-          });
-        }
-      },
     );
   }
 
@@ -895,7 +842,7 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
         else if (labeltext == 'Delete') {
           deleteteacher(teacherid.dropDownValue!.name.toString());
         } else if (labeltext == 'Update') {
-          updatestudentdetail(
+          updateteacherdetails(
               context, teacherid.dropDownValue!.name.toString());
         } else if (labeltext == 'Submit') {
           submit(context, teacheridcontroller.text.toString());
@@ -925,29 +872,29 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
     emailidcontroller.clear();
     phonecontroller.clear();
     department.clearDropDown();
-    year.clearDropDown();
+    // year.clearDropDown();
   }
 
 // method of update student details
-  Future updatestudentdetail(BuildContext context, String id) async {
+  Future updateteacherdetails(BuildContext context, String id) async {
     if (updatefirstnamekey.currentState!.validate() &&
         updatemidlenamekey.currentState!.validate() &&
         updatelastnamekey.currentState!.validate() &&
         updateemailkey.currentState!.validate() &&
         updatephonekey.currentState!.validate() &&
         updatedepartmentkey.currentState!.validate() &&
-        updateyearkey.currentState!.validate()) {
-      await FirebaseFirestore.instance.collection("Teacher").doc(id).set(
+        updateclasskey.currentState!.validate()) {
+      await FirebaseFirestore.instance.collection("Teacher").doc(id).update(
         {
           'First Name': firstnamecontroller.text.toString(),
           'Midle Name': midlenamecontroller.text.toString(),
           'Last Name': lastnamecontroller.text.toString(),
-          'Phone': phonecontroller.text.toString(),
-          'Year': year.dropDownValue!.name.toString(),
+          'Phone': int.parse(phonecontroller.text),
           'TID': teacherid.dropDownValue!.name.toString(),
           'Email': emailidcontroller.text.toString(),
           'Department': department.dropDownValue!.name.toString(),
           'Account Type': accounttype.toString(),
+          'Class': classvalue.dropDownValue!.name.toString()
         },
       ).whenComplete(
         () {
@@ -973,7 +920,7 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
         createemailkey.currentState!.validate() &&
         createphonekey.currentState!.validate() &&
         createdepartmentkey.currentState!.validate() &&
-        createyearkey.currentState!.validate()) {
+        createclasskey.currentState!.validate()) {
       String profilephotourl =
           'https://firebasestorage.googleapis.com/v0/b/myapp-2bd7a.appspot.com/o/images%2FProfile%2FDefaultProfilePhoto%2Fldpr_logo.png?alt=media&token=86477a33-6c6c-4dcc-b9e1-b70529bfbc45';
       await FirebaseFirestore.instance.collection("Teacher").doc(id).set(
@@ -984,10 +931,10 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
           'Last Name': lastnamecontroller.text.toString(),
           'TID': teacheridcontroller.text.toString(),
           'Email': emailidcontroller.text.toString(),
-          'Phone': phonecontroller.text.toString(),
+          'Phone': int.parse(phonecontroller.text),
           'Department': department.dropDownValue!.name.toString(),
-          'Year': year.dropDownValue!.name.toString(),
           'Account Type': accounttype.toString(),
+          'Class': classvalue.dropDownValue!.name.toString(),
         },
       ).whenComplete(
         () async {
@@ -996,99 +943,109 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
                 email: emailidcontroller.text.toString(), password: '123456');
           } catch (e) {
             return;
+          } finally {
+            Navigator.pop(context);
           }
-          Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                "Student teacher",
-              ),
-            ),
-          );
         },
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Teacher Added",
+          ),
+        ),
       );
     }
   }
 
 // method of enrollment lsit
-  dropdownenrollmentlist(
-      BuildContext context,
-      String labeltext,
-      List<DropDownValueModel> studentenrollmentlist,
-      SingleValueDropDownController controller,
-      bool bool) {
+  dropdownenrollmentlist(BuildContext context, String labeltext,
+      SingleValueDropDownController teacherid, bool bool) {
     return Column(
       children: [
-        DropDownTextField(
-          onChanged: (value) async {
-            visible = true;
-            if (teacherid.dropDownValue != null) {
-              // get teacher details
-              await getteacherdetail(teacherid.dropDownValue!.name.toString());
-            }
-            // set controller value
-            firstnamecontroller.text = firstnamevalue.toString();
-            midlenamecontroller.text = midlenamevalue.toString();
-            lastnamecontroller.text = lastnamevalue.toString();
-            emailidcontroller.text = emailidvalue.toString();
-            phonecontroller.text = phonenovalue.toString();
-            department.setDropDown(
-              DropDownValueModel(
-                name: departmentvalue.toString(),
-                value: departmentvalue.toString(),
-              ),
-            );
+        FutureBuilder(
+            future: getlist.getteachernamelist(),
+            builder: (context, future) {
+              if (future.hasData) {
+                return DropDownTextField(
+                  isEnabled: bool,
+                  dropDownList: future.data!,
+                  onChanged: (value) async {
+                    setState(
+                      () {
+                        visible = true;
+                        print(visible);
+                      },
+                    );
 
-            year.setDropDown(
-              DropDownValueModel(
-                name: yearvalue.toString(),
-                value: yearvalue.toString(),
-              ),
-            );
-
-            setState(() {});
-          },
-          isEnabled: bool,
-          dropDownList: studentenrollmentlist,
-          validator: (value) {
-            if (teacherid.dropDownValue == null) {
-              return "Select enrollment";
-            } else if (teacherid.dropDownValue!.name.isEmpty) {
-              return "Select enrollment";
-            } else {
-              return null;
-            }
-          },
-          controller: controller,
-          dropDownItemCount: 5,
-          dropdownRadius: 10,
-          textFieldDecoration: InputDecoration(
-            labelText: labeltext,
-            disabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(
-                color: Colors.grey,
-              ),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(
-                width: 2,
-                color: Theme.of(context).primaryColor,
-              ),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderSide: BorderSide(
-                color: Colors.red,
-              ),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey),
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-        ),
+                    if (teacherid.dropDownValue != null) {
+                      // get teacher details
+                      await getteacherdetail(
+                          teacherid.dropDownValue!.name.toString());
+                    }
+                    // set controller value
+                    firstnamecontroller.text = firstnamevalue.toString();
+                    midlenamecontroller.text = midlenamevalue.toString();
+                    lastnamecontroller.text = lastnamevalue.toString();
+                    emailidcontroller.text = emailidvalue.toString();
+                    phonecontroller.text = phonenovalue.toString();
+                    department.setDropDown(
+                      DropDownValueModel(
+                        name: departmentvalue.toString(),
+                        value: departmentvalue.toString(),
+                      ),
+                    );
+                    classvalue.setDropDown(
+                      DropDownValueModel(
+                        name: classes,
+                        value: classes,
+                      ),
+                    );
+                  },
+                  validator: (value) {
+                    if (teacherid.dropDownValue == null) {
+                      return "Select enrollment";
+                    } else if (teacherid.dropDownValue!.name.isEmpty) {
+                      return "Select enrollment";
+                    } else {
+                      return null;
+                    }
+                  },
+                  controller: teacherid,
+                  dropDownItemCount: 5,
+                  dropdownRadius: 10,
+                  textFieldDecoration: InputDecoration(
+                    labelText: labeltext,
+                    disabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.grey,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        width: 2,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.red,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                );
+              }
+              return Center(
+                child: Text("Something went wrong"),
+              );
+            }),
         SizedBox(
           height: 15,
         ),
@@ -1099,19 +1056,26 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
 // method of gettin teacher details
   Future getteacherdetail(String id) async {
     await FirebaseFirestore.instance.collection("Teacher").doc(id).get().then(
-      (value) {
-        if (value.exists) {
-          setState(
-            () {
-              firstnamevalue = value.data()!['First Name'];
-              midlenamevalue = value.data()!['Midle Name'];
-              lastnamevalue = value.data()!['Last Name'];
-              emailidvalue = value.data()!['Email'];
-              phonenovalue = value.data()!['Phone'];
-              departmentvalue = value.data()!['Department'];
-              yearvalue = value.data()!['Year'];
-            },
-          );
+      (DocumentSnapshot snapshot) {
+        if (snapshot.exists) {
+          firstnamevalue = snapshot['First Name'];
+          midlenamevalue = snapshot['Midle Name'];
+          lastnamevalue = snapshot['Last Name'];
+          emailidvalue = snapshot['Email'];
+          phonenovalue = snapshot['Phone'];
+          departmentvalue = snapshot['Department'];
+          classes = snapshot['Class'];
+
+          print(firstnamevalue);
+          print(midlenamevalue);
+          print(lastnamevalue);
+          print(emailidvalue);
+          print('phonenumber$phonenovalue');
+          // print('type of phone number'+);
+          if (phonenovalue.runtimeType == num) {
+            print('truetrue');
+          }
+          setState(() {});
         }
       },
     );

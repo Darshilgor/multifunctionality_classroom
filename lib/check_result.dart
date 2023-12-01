@@ -1,19 +1,16 @@
-import 'dart:async';
-import 'dart:ffi';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_textfield/dropdown_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:my_app/utils/constant/constants.dart';
 
-class Result extends StatefulWidget {
-  const Result({super.key});
+class Check_Result extends StatefulWidget {
+  const Check_Result({super.key});
 
   @override
-  State<Result> createState() => _ResultState();
+  State<Check_Result> createState() => _Check_ResultState();
 }
 
-class _ResultState extends State<Result> {
+class _Check_ResultState extends State<Check_Result> {
   final semesterkey = GlobalKey<FormState>();
   List<String> semesters = [];
   List<DropDownValueModel> semesterlist = [];
@@ -29,11 +26,15 @@ class _ResultState extends State<Result> {
   double average = 0;
   double total = 0;
   double cpi = 0;
+  double sumofspi = 0;
+  double CPI = 0;
+  int ssemester = 0;
   @override
   void initState() {
     super.initState();
     getsemesterlist();
     semester = SingleValueDropDownController();
+    getstudentdata();
   }
 
   Widget build(BuildContext context) {
@@ -73,26 +74,41 @@ class _ResultState extends State<Result> {
                 readOnly: true,
               ),
             ),
-            Align(
-              alignment: Alignment.bottomLeft,
-              child: Text(
-                'CPI',
-              ),
+            SizedBox(
+              height: 20,
             ),
-            Padding(
-              padding: const EdgeInsets.only(
-                left: 10,
-                right: 10,
-              ),
-              child: TextFormField(
-                controller: TextEditingController(text: '$cpi'),
-                readOnly: true,
-              ),
-            ),
+            if (semester.dropDownValue != null) showcpi(),
           ],
         ),
       ),
     );
+  }
+
+  showcpi() {
+    if (ssemester.toString() == semester.dropDownValue!.name.toString()) {
+      return Column(
+        children: [
+          Align(
+            alignment: Alignment.bottomLeft,
+            child: Text(
+              'CPI',
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(
+              left: 10,
+              right: 10,
+            ),
+            child: TextFormField(
+              controller: TextEditingController(text: '$CPI'),
+              readOnly: true,
+            ),
+          ),
+        ],
+      );
+    } else {
+      return Container();
+    }
   }
 
   Future getsemesterlist() async {
@@ -130,8 +146,14 @@ class _ResultState extends State<Result> {
     return sem;
   }
 
-  createstudentdropdown(BuildContext context, String labeltext, semesterlist,
-      semester, bool bool, String errormessage, branchkey) {
+  createstudentdropdown(
+      BuildContext context,
+      String labeltext,
+      List<DropDownValueModel> semesterlist,
+      SingleValueDropDownController semester,
+      bool bool,
+      String errormessage,
+      GlobalKey<FormState> branchkey) {
     return Column(
       children: [
         Form(
@@ -271,6 +293,7 @@ class _ResultState extends State<Result> {
         SPI(marks);
       },
     );
+    print("Marks Is $marks");
     return marks;
   }
 
@@ -283,40 +306,8 @@ class _ResultState extends State<Result> {
     print(sum);
     average = (sum / marks.length) / 10;
     print(average);
-    CPI(average, semester.dropDownValue!.name);
+    print("Average Is $average");
     return average;
-  }
-
-  double CPI(double average, String semester) {
-    if (semester == '1') {
-      setState(() {
-        cpi = average;
-      });
-    } else {
-      setState(() {
-        getlatestcpi();
-      });
-    }
-    return cpi;
-  }
-
-  Future getlatestcpi() async {
-    FirebaseFirestore.instance
-        .collection(uType)
-        .doc(uId)
-        .collection(semester.toString())
-        .get()
-        .then(
-      (QuerySnapshot snapshot) {
-        snapshot.docs.forEach((element) {
-          setState(() {
-            listofspi.add(
-              element['CPI'],
-            );
-          });
-        });
-      },
-    );
   }
 
   Future getlistofmarksandsubject(List<String> sem) async {
@@ -373,28 +364,38 @@ class _ResultState extends State<Result> {
       );
     }
     print('SPI added');
-    getSPIlist();
+    print("Calculate sumofcpi");
+    addcpi();
   }
 
-  Future getSPIlist() async {
-    var spi= FirebaseFirestore.instance.collection(uType).doc(uId).snapshots();
-    FutureBuilder(
-
-      future: spi,
-      builder:
-          (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-        if (snapshot.hasData) {
-          for (int i = 0; i <= sem.length - 1; i++) {
-            Map<String,dynamic> spi =
-                snapshot.data!.data() as Map<String,dynamic>;
-            SPIlist[i] += spi['SPI${i + 1}'] ;
-            
-          }
-        }
-        return Text("No Data Found");
+  Future addcpi() async {
+    for (int i = 1; i <= ssemester; i++) {
+      await FirebaseFirestore.instance.collection(uType).doc(uId).get().then(
+        (value) {
+          sumofspi += value['SPI$i'];
+        },
+      );
+    }
+    print(sumofspi);
+    CPI = sumofspi / ssemester;
+    await FirebaseFirestore.instance.collection(uType).doc(uId).update(
+      {
+        'CPI': CPI,
       },
     );
-    print(SPIlist);
-    return SPIlist;
+    print("finally CPI added");
+  }
+
+  Future getstudentdata() async {
+    await FirebaseFirestore.instance
+        .collection('Student')
+        .doc(uId)
+        .get()
+        .then((value) {
+      setState(() {
+        ssemester = value['Semester'];
+      });
+      print(ssemester);
+    });
   }
 }

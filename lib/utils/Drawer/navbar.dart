@@ -2,7 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_app/main.dart';
-import 'package:my_app/student_result.dart';
+import 'package:my_app/student_corner_features.dart';
+import 'package:my_app/teachercorner.dart';
 import 'package:my_app/utils/Admin/adminpage.dart';
 import 'package:my_app/utils/Drawer/courses/courses.dart';
 import 'package:my_app/utils/Drawer/studentlist/studentlist.dart';
@@ -36,7 +37,7 @@ class _NavbarState extends State<Navbar> {
   void initState() {
     super.initState();
     getLocalData();
-    userData();
+    // userData();
   }
 
   @override
@@ -76,7 +77,7 @@ class _NavbarState extends State<Navbar> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => Result(),
+                    builder: (context) => StudetnCornerFeatures(),
                   ),
                 );
               },
@@ -170,6 +171,27 @@ class _NavbarState extends State<Navbar> {
               ),
               title: Text(
                 "Admin Panel",
+                style: TextStyle(fontSize: 17),
+              ),
+            ),
+          ),
+          Visibility(
+            visible: uType == 'Teacher',
+            child: ListTile(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TeacherCorner(),
+                  ),
+                );
+              },
+              leading: Icon(
+                Icons.admin_panel_settings,
+                size: 29,
+              ),
+              title: Text(
+                "Teacher Corner",
                 style: TextStyle(fontSize: 17),
               ),
             ),

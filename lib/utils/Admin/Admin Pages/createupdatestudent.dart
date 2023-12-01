@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:my_app/utils/Admin/adminpage.dart';
+import 'package:my_app/utils/constant/getlist.dart';
 
 class CreateUpdateStudent extends StatefulWidget {
   final String title;
@@ -17,6 +18,7 @@ class CreateUpdateStudent extends StatefulWidget {
 }
 
 class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
+  GetList getlist = GetList();
 //textformfield controller
   TextEditingController accounttypecontroller = TextEditingController();
   TextEditingController departmentcontroller = TextEditingController();
@@ -28,37 +30,34 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
   TextEditingController phonecontroller = TextEditingController();
   TextEditingController semestercontroller = TextEditingController();
   TextEditingController yearcontroller = TextEditingController();
+
   String studentname = '';
 
 //student dropdowntextfield
-  List<String> studentenrollments = [];
-  List<DropDownValueModel> studentenrollmentlist = [];
   late SingleValueDropDownController enrollment;
 
 //depart dropdowntextfield
-  List<String> departments = [];
-  List<DropDownValueModel> departmentlist = [];
   late SingleValueDropDownController department;
 
 //semester dropdowntextfield
-  List<String> semesters = [];
-  List<DropDownValueModel> semesterlist = [];
   late SingleValueDropDownController semester;
 
 //year dropdowntextfield
-  List<String> years = [];
-  List<DropDownValueModel> yearlist = [];
+
   late SingleValueDropDownController year;
+
+  late SingleValueDropDownController classvalue;
 
 //getting value from database and store in controller
   String firstnamevalue = '';
   String midlenamevalue = '';
   String lastnamevalue = '';
   String emailidvalue = '';
-  String phonenovalue = '';
+  num phonenovalue = 0;
   String departmentvalue = '';
-  String semestervalue = '';
-  String yearvalue = '';
+  int semestervalue = 0;
+  int yearvalue = 0;
+  String gettingclassvalue = '';
   bool visible = false; //visibility
 
 //different textformfield key
@@ -80,20 +79,20 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
   final updatesemesterkey = GlobalKey<FormState>();
   final createyearkey = GlobalKey<FormState>();
   final updateyearkey = GlobalKey<FormState>();
+  final createclasskey = GlobalKey<FormState>();
+  final updateclasskey = GlobalKey<FormState>();
 
   final String collection = "Student";
 
   @override
   void initState() {
     super.initState();
-    getstudentenrollmentlist(); //getting student enrollmentlist
-    getdepartmentlist(); //getting branch list
-    getsemesterlist(); //getting semester list
-    getyearlist();
+
     enrollment = SingleValueDropDownController();
     department = SingleValueDropDownController();
     semester = SingleValueDropDownController();
     year = SingleValueDropDownController();
+    classvalue = SingleValueDropDownController();
   }
 
   File? profileimage;
@@ -124,12 +123,8 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
                       children: [
                         if (widget.title == 'Update Student')
                           //dropdowntextfield for enrollment in update student
-                          dropdownenrollmentlist(
-                              context,
-                              "Select student enrollment",
-                              studentenrollmentlist,
-                              enrollment,
-                              true),
+                          dropdownenrollmentlist(context,
+                              "Select student enrollment", enrollment, true),
                       ],
                     ),
                   ),
@@ -232,7 +227,6 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
                       ? createstudentdropdown(
                           context,
                           "Select Branch",
-                          departmentlist,
                           department,
                           createdepartmentkey,
                           true,
@@ -241,37 +235,29 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
                       : updatestudentdropdown(
                           context,
                           "Select Branch",
-                          departmentlist,
                           department,
                           updatedepartmentkey,
                           true,
                           "Select Branch"),
                   (widget.title == "Create Student")
                       // dropdowntextfield for semester in create student
-                      ? createstudentdropdown(
-                          context,
-                          "Select Semester",
-                          semesterlist,
-                          semester,
-                          createsemesterkey,
-                          true,
-                          "Select Semester")
+                      ? createstudentdropdown(context, "Select Semester",
+                          semester, createsemesterkey, true, "Select Semester")
                       // dropdowntextfield for semester in update student
-                      : updatestudentdropdown(
-                          context,
-                          "Select Semester",
-                          semesterlist,
-                          semester,
-                          updatesemesterkey,
-                          true,
-                          "Select Semester"),
+                      : updatestudentdropdown(context, "Select Semester",
+                          semester, updatesemesterkey, true, "Select Semester"),
+                  (widget.title == 'Create Student')
+                      ? createstudentdropdown(context, "Select Class",
+                          classvalue, createclasskey, true, "Select Class")
+                      : updatestudentdropdown(context, "Select Class",
+                          classvalue, updateclasskey, true, "Select Class"),
                   (widget.title == "Create Student")
                       // dropdowntextfield for year in create student
-                      ? createstudentdropdown(context, "Select Year", yearlist,
-                          year, createyearkey, true, "Select Year")
+                      ? createstudentdropdown(context, "Select Year", year,
+                          createyearkey, true, "Select Year")
                       //dropdowntextfield for year in update student
-                      : updatestudentdropdown(context, "Select Year", yearlist,
-                          year, updateyearkey, true, "Select Year"),
+                      : updatestudentdropdown(context, "Select Year", year,
+                          updateyearkey, true, "Select Year"),
                   if (widget.title == 'Create Student')
                     //clear submit button in create student
                     clearsubmitbutton(),
@@ -376,116 +362,103 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
     );
   }
 
-//get student enrollment list method
-  Future getstudentenrollmentlist() async {
-    await FirebaseFirestore.instance.collection("Student").get().then(
-      (QuerySnapshot snapshot) {
-        snapshot.docs.forEach(
-          (element) {
-            setState(() {
-              studentenrollments.add(
-                element['Enrollment No'],
-              );
-            });
-          },
-        );
-        for (int i = 0; i < studentenrollments.length; i++) {
-          setState(() {
-            studentenrollmentlist.add(
-              DropDownValueModel(
-                name: studentenrollments[i],
-                value: studentenrollments[i],
-              ),
-            );
-          });
-        }
-      },
-    );
-  }
-
 //dropdowntextfield of enrollment list in update student
-  dropdownenrollmentlist(
-      BuildContext context,
-      String labeltext,
-      List<DropDownValueModel> studentenrollmentlist,
-      SingleValueDropDownController controller,
-      bool bool) {
+  dropdownenrollmentlist(BuildContext context, String labeltext,
+      SingleValueDropDownController controller, bool bool) {
     return Column(
       children: [
-        DropDownTextField(
-          onChanged: (value) async {
-            visible = true;
-            if (enrollment.dropDownValue != null) {
-              //getting student details from database
-              await getstudentdetail(enrollment.dropDownValue!.name.toString());
-            }
-            //set controller value
-            firstnamecontroller.text = firstnamevalue.toString();
-            midlenamecontroller.text = midlenamevalue.toString();
-            lastnamecontroller.text = lastnamevalue.toString();
-            emailidcontroller.text = emailidvalue.toString();
-            phonecontroller.text = phonenovalue.toString();
-            department.setDropDown(
-              DropDownValueModel(
-                name: departmentvalue.toString(),
-                value: departmentvalue.toString(),
-              ),
-            );
-            semester.setDropDown(
-              DropDownValueModel(
-                name: semestervalue.toString(),
-                value: semestervalue.toString(),
-              ),
-            );
-            year.setDropDown(
-              DropDownValueModel(
-                name: yearvalue.toString(),
-                value: yearvalue.toString(),
-              ),
-            );
-            setState(() {});
-          },
-          isEnabled: bool,
-          dropDownList: studentenrollmentlist,
-          validator: (value) {
-            if (enrollment.dropDownValue == null) {
-              return "Select enrollment";
-            } else if (enrollment.dropDownValue!.name.isEmpty) {
-              return "Select enrollment";
-            } else {
-              return null;
-            }
-          },
-          controller: controller,
-          dropDownItemCount: 5,
-          dropdownRadius: 10,
-          textFieldDecoration: InputDecoration(
-            labelText: labeltext,
-            disabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(
-                color: Colors.grey,
-              ),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(
-                width: 2,
-                color: Theme.of(context).primaryColor,
-              ),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderSide: BorderSide(
-                color: Colors.red,
-              ),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey),
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-        ),
+        FutureBuilder(
+            future: getlist.getstudentenrollmentlist(),
+            builder: (context, future) {
+              if (future.hasData) {
+                return DropDownTextField(
+                  onChanged: (value) async {
+                    visible = true;
+                    if (enrollment.dropDownValue != null) {
+                      //getting student details from database
+                      await getstudentdetail(
+                          enrollment.dropDownValue!.name.toString());
+                    }
+                    //set controller value
+                    firstnamecontroller.text = firstnamevalue.toString();
+                    midlenamecontroller.text = midlenamevalue.toString();
+                    lastnamecontroller.text = lastnamevalue.toString();
+                    emailidcontroller.text = emailidvalue.toString();
+                    phonecontroller.text = phonenovalue.toString();
+                    department.setDropDown(
+                      DropDownValueModel(
+                        name: departmentvalue.toString(),
+                        value: departmentvalue.toString(),
+                      ),
+                    );
+                    semester.setDropDown(
+                      DropDownValueModel(
+                        name: semestervalue.toString(),
+                        value: semestervalue.toString(),
+                      ),
+                    );
+                    year.setDropDown(
+                      DropDownValueModel(
+                        name: yearvalue.toString(),
+                        value: yearvalue.toString(),
+                      ),
+                    );
+                    classvalue.setDropDown(
+                      DropDownValueModel(
+                        name: gettingclassvalue.toString(),
+                        value: gettingclassvalue.toString(),
+                      ),
+                    );
+                  },
+                  isEnabled: bool,
+                  dropDownList: future.data!,
+                  validator: (value) {
+                    if (enrollment.dropDownValue == null) {
+                      return "Select enrollment";
+                    } else if (enrollment.dropDownValue!.name.isEmpty) {
+                      return "Select enrollment";
+                    } else {
+                      return null;
+                    }
+                  },
+                  controller: controller,
+                  dropDownItemCount: 5,
+                  dropdownRadius: 10,
+                  textFieldDecoration: InputDecoration(
+                    labelText: labeltext,
+                    disabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.grey,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        width: 2,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.red,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                );
+              } else {
+                return Center(
+                  child: Text(
+                    "Something went wrong",
+                  ),
+                );
+              }
+            }),
         SizedBox(
           height: 15,
         ),
@@ -506,33 +479,6 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
           departmentvalue = value.data()!['Branch'];
           semestervalue = value.data()!['Semester'];
           yearvalue = value.data()!['Year'];
-        }
-      },
-    );
-  }
-
-//getting department list method
-  Future getdepartmentlist() async {
-    await FirebaseFirestore.instance.collection("Branch").get().then(
-      (QuerySnapshot snapshot) {
-        snapshot.docs.forEach(
-          (element) {
-            setState(() {
-              departments.add(
-                element['Branch Name'],
-              );
-            });
-          },
-        );
-        for (int i = 0; i < departments.length; i++) {
-          setState(() {
-            departmentlist.add(
-              DropDownValueModel(
-                name: departments[i],
-                value: departments[i],
-              ),
-            );
-          });
         }
       },
     );
@@ -596,33 +542,6 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
     );
   }
 
-//getting semester list method
-  Future getsemesterlist() async {
-    await FirebaseFirestore.instance.collection("Semester").get().then(
-      (QuerySnapshot snapshot) {
-        snapshot.docs.forEach(
-          (element) {
-            setState(() {
-              semesters.add(
-                element['Semester No'],
-              );
-            });
-          },
-        );
-        for (int i = 0; i < semesters.length; i++) {
-          setState(() {
-            semesterlist.add(
-              DropDownValueModel(
-                name: semesters[i],
-                value: semesters[i],
-              ),
-            );
-          });
-        }
-      },
-    );
-  }
-
 //select semester method
   dropdownsemester(
       BuildContext context,
@@ -678,33 +597,6 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
           height: 15,
         ),
       ],
-    );
-  }
-
-//getting year list method
-  Future getyearlist() async {
-    await FirebaseFirestore.instance.collection("Year").get().then(
-      (QuerySnapshot snapshot) {
-        snapshot.docs.forEach(
-          (element) {
-            setState(() {
-              years.add(
-                element['Year'],
-              );
-            });
-          },
-        );
-        for (int i = 0; i < years.length; i++) {
-          setState(() {
-            yearlist.add(
-              DropDownValueModel(
-                name: years[i],
-                value: years[i],
-              ),
-            );
-          });
-        }
-      },
     );
   }
 
@@ -781,6 +673,7 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
               departmentvalue = value.data()!['Branch'];
               semestervalue = value.data()!['Semester'];
               yearvalue = value.data()!['Year'];
+              gettingclassvalue = value.data()!['Class'];
             },
           );
         }
@@ -882,22 +775,22 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
           'Midle Name': midlenamecontroller.text.toString(),
           'Last Name': lastnamecontroller.text.toString(),
           'Email': emailidcontroller.text.toString(),
-          'Phone': phonecontroller.text.toString(),
+          'Phone': int.parse(phonecontroller.text),
           'Branch': department.dropDownValue!.name.toString(),
-          'Semester': semester.dropDownValue!.name.toString(),
-          'Year': year.dropDownValue!.name.toString(),
+          'Semester': int.parse(semester.dropDownValue!.name),
+          'Year': int.parse(year.dropDownValue!.name),
         },
       ).whenComplete(
         () {
           Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                "Update Student",
-              ),
-            ),
-          );
         },
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Update Student",
+          ),
+        ),
       );
     }
   }
@@ -912,7 +805,8 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
         createphonekey.currentState!.validate() &&
         createdepartmentkey.currentState!.validate() &&
         createsemesterkey.currentState!.validate() &&
-        createyearkey.currentState!.validate()) {
+        createyearkey.currentState!.validate() &&
+        createclasskey.currentState!.validate()) {
       String profilephotourl =
           'https://firebasestorage.googleapis.com/v0/b/myapp-2bd7a.appspot.com/o/images%2FProfile%2FDefaultProfilePhoto%2Fldpr_logo.png?alt=media&token=86477a33-6c6c-4dcc-b9e1-b70529bfbc45';
       await FirebaseFirestore.instance.collection("Student").doc(id).set(
@@ -924,10 +818,10 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
           'Last Name': lastnamecontroller.text.toString(),
           'Enrollment No': studentenrollment.text.toString(),
           'Email': emailidcontroller.text.toString(),
-          'Phone': phonecontroller.text.toString(),
+          'Phone': int.parse(phonecontroller.text),
           'Branch': department.dropDownValue!.name.toString(),
-          'Semester': semester.dropDownValue!.name.toString(),
-          'Year': year.dropDownValue!.name.toString(),
+          'Semester': int.parse(semester.dropDownValue!.name),
+          'Year': int.parse(year.dropDownValue!.name),
         },
       ).whenComplete(
         () async {
@@ -937,15 +831,20 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
           } catch (e) {
             return;
           }
-          Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                "Student created",
-              ),
-            ),
-          );
         },
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Student created",
+          ),
+        ),
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AdminPage(),
+        ),
       );
     }
   }
@@ -990,6 +889,7 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
         Form(
           key: key,
           child: TextFormField(
+            maxLength: (labeltext == 'Phone No') ? 10 : 1000,
             validator: (value) {
               if (controller.text.toString() == null) {
                 return errormessage;
@@ -1001,6 +901,7 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
             },
             controller: controller,
             decoration: InputDecoration(
+              counterText: '',
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 13,
                 vertical: 23,
@@ -1040,6 +941,7 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
           child: Visibility(
             visible: visible,
             child: TextFormField(
+              maxLength: (labletext == 'Phone No') ? 10 : 100,
               validator: (value) {
                 if (controller.text.toString() == null) {
                   return errormessage;
@@ -1051,6 +953,7 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
               },
               controller: controller,
               decoration: InputDecoration(
+                counterText: '',
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 13,
                   vertical: 23,
@@ -1080,7 +983,6 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
   createstudentdropdown(
       BuildContext context,
       String errormessage,
-      List<DropDownValueModel> list,
       SingleValueDropDownController controller,
       GlobalKey<FormState> key,
       bool bool,
@@ -1089,47 +991,68 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
       children: [
         Form(
           key: key,
-          child: DropDownTextField(
-            isEnabled: bool,
-            dropDownList: list,
-            validator: (value) {
-              if (controller.dropDownValue == null) {
-                return errormessage;
-              } else if (controller.dropDownValue!.name.isEmpty) {
-                return errormessage;
+          child: FutureBuilder(
+            future: (labeltext == 'Select Branch')
+                ? getlist.getdepartmentlist()
+                : ((labeltext == 'Select Semester')
+                    ? getlist.getsemesterlist()
+                    : (labeltext == 'Select Class' &&
+                            department.dropDownValue != null)
+                        ? getlist.getclasslist(
+                            department.dropDownValue!.name.toString())
+                        : getlist.getyearlist()),
+            builder: (context, future) {
+              if (future.hasData) {
+                return DropDownTextField(
+                  isEnabled: bool,
+                  dropDownList: future.data!,
+                  validator: (value) {
+                    if (controller.dropDownValue == null) {
+                      return errormessage;
+                    } else if (controller.dropDownValue!.name.isEmpty) {
+                      return errormessage;
+                    } else {
+                      return null;
+                    }
+                  },
+                  controller: controller,
+                  dropDownItemCount: 5,
+                  dropdownRadius: 10,
+                  textFieldDecoration: InputDecoration(
+                    labelText: labeltext,
+                    disabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.grey,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        width: 2,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.red,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                );
               } else {
-                return null;
+                return Center(
+                  child: Text(
+                    "Something went wrong",
+                  ),
+                );
               }
             },
-            controller: controller,
-            dropDownItemCount: 5,
-            dropdownRadius: 10,
-            textFieldDecoration: InputDecoration(
-              labelText: labeltext,
-              disabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Colors.grey,
-                ),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  width: 2,
-                  color: Theme.of(context).primaryColor,
-                ),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              errorBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Colors.red,
-                ),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey),
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
           ),
         ),
         SizedBox(
@@ -1143,7 +1066,6 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
   updatestudentdropdown(
       BuildContext context,
       String errormessage,
-      List<DropDownValueModel> list,
       SingleValueDropDownController controller,
       GlobalKey<FormState> key,
       bool bool,
@@ -1154,47 +1076,68 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
           visible: visible,
           child: Form(
             key: key,
-            child: DropDownTextField(
-              isEnabled: bool,
-              dropDownList: list,
-              validator: (value) {
-                if (controller.dropDownValue == null) {
-                  return errormessage;
-                } else if (controller.dropDownValue!.name.isEmpty) {
-                  return errormessage;
+            child: FutureBuilder(
+              future: (labeltext == 'Select Branch')
+                  ? getlist.getdepartmentlist()
+                  : ((labeltext == 'Select Semester')
+                      ? getlist.getsemesterlist()
+                      : (labeltext == 'Select Class' &&
+                              department.dropDownValue != null)
+                          ? getlist.getclasslist(
+                              department.dropDownValue!.name.toString())
+                          : getlist.getyearlist()),
+              builder: (context, future) {
+                if (future.hasData) {
+                  return DropDownTextField(
+                    isEnabled: bool,
+                    dropDownList: future.data!,
+                    validator: (value) {
+                      if (controller.dropDownValue == null) {
+                        return errormessage;
+                      } else if (controller.dropDownValue!.name.isEmpty) {
+                        return errormessage;
+                      } else {
+                        return null;
+                      }
+                    },
+                    controller: controller,
+                    dropDownItemCount: 5,
+                    dropdownRadius: 10,
+                    textFieldDecoration: InputDecoration(
+                      labelText: labeltext,
+                      disabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.grey,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          width: 2,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  );
                 } else {
-                  return null;
+                  return Center(
+                    child: Text(
+                      "Something went wrong",
+                    ),
+                  );
                 }
               },
-              controller: controller,
-              dropDownItemCount: 5,
-              dropdownRadius: 10,
-              textFieldDecoration: InputDecoration(
-                labelText: labeltext,
-                disabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color: Colors.grey,
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    width: 2,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                errorBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color: Colors.red,
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
             ),
           ),
         ),

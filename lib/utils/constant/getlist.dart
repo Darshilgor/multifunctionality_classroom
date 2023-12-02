@@ -30,13 +30,13 @@ class GetList {
     return teacheridlist;
   }
 
-  Future<List<DropDownValueModel>> getmentorlist() async {
+  Future<List<DropDownValueModel>> getmentorlist(String collection) async {
     List<String> mentorfirstname = [];
     List<String> mentormidlename = [];
     List<String> mentorlastname = [];
     List<DropDownValueModel> mentorlist = [];
 
-    await FirebaseFirestore.instance.collection("Teacher").get().then(
+    await FirebaseFirestore.instance.collection(collection).get().then(
       (QuerySnapshot querysnapshot) {
         querysnapshot.docs.forEach(
           (element) {
@@ -70,6 +70,33 @@ class GetList {
       },
     );
     return mentorlist;
+  }
+
+  Future<List<String>> getstudentlist(
+      String collection, String branchname, int semestername) async {
+    List<String> firstname = [];
+    List<String> midlename = [];
+    List<String> lastname = [];
+    List<String> studentlist = [];
+    await FirebaseFirestore.instance.collection(collection).get().then(
+      (QuerySnapshot snapshot) {
+        snapshot.docs.forEach(
+          (element) {
+            if (branchname == element['Branch'] &&
+                semestername == element['Semester']) {
+              firstname.add(element['First Name']);
+              midlename.add(element['Midle Name']);
+              lastname.add(element['Last Name']);
+            }
+          },
+        );
+        for (int i = 0; i < firstname.length; i++) {
+          studentlist.add('${firstname[i]}  ${midlename[i]}  ${lastname[i]}');
+        }
+      },
+    );
+    print(studentlist);
+    return studentlist;
   }
 
   Future<List<DropDownValueModel>> getdepartmentlist() async {
@@ -179,7 +206,7 @@ class GetList {
     );
     return semesterlist;
   }
-  
+
   Future<List<DropDownValueModel>> getyearlist() async {
     List<String> years = [];
     List<DropDownValueModel> yearlist = [];

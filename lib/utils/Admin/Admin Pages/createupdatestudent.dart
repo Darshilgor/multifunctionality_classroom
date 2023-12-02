@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_textfield/dropdown_textfield.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -95,7 +93,7 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
     classvalue = SingleValueDropDownController();
   }
 
-  File? profileimage;
+  // File? profileimage;
   final ImagePicker _picker = ImagePicker();
   String profilephotourl = '';
 
@@ -409,6 +407,7 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
                         value: gettingclassvalue.toString(),
                       ),
                     );
+                    setState(() {});
                   },
                   isEnabled: bool,
                   dropDownList: future.data!,
@@ -745,7 +744,7 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
         .doc(id)
         .delete()
         .whenComplete(
-      () {
+      () {  
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -822,6 +821,7 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
           'Branch': department.dropDownValue!.name.toString(),
           'Semester': int.parse(semester.dropDownValue!.name),
           'Year': int.parse(year.dropDownValue!.name),
+          'Class': classvalue.dropDownValue!.name,
         },
       ).whenComplete(
         () async {
@@ -1003,9 +1003,11 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
                         : getlist.getyearlist()),
             builder: (context, future) {
               if (future.hasData) {
+                List<DropDownValueModel> list = [];
+                list = future.data!;
                 return DropDownTextField(
                   isEnabled: bool,
-                  dropDownList: future.data!,
+                  dropDownList: list,
                   validator: (value) {
                     if (controller.dropDownValue == null) {
                       return errormessage;
@@ -1014,6 +1016,9 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
                     } else {
                       return null;
                     }
+                  },
+                  onChanged: (value) {
+                    setState(() {});
                   },
                   controller: controller,
                   dropDownItemCount: 5,

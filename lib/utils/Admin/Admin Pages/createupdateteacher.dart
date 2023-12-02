@@ -662,6 +662,9 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
                           return null;
                         }
                       },
+                      onChanged: (value) {
+                        setState(() {});
+                      },
                       controller: controller,
                       dropDownItemCount: 5,
                       dropdownRadius: 10,

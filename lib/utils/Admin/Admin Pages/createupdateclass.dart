@@ -384,7 +384,7 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
           ? getlist.getdepartmentlist()
           : (labeltext == 'Select Semester')
               ? getlist.getsemesterlist()
-              : getlist.getmentorlist(),
+              : getlist.getmentorlist('Teacher'),
       builder: (context, future) {
         if (future.hasData) {
           print(future.data);

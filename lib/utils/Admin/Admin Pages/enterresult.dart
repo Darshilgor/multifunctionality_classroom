@@ -59,19 +59,14 @@ class _EnterResultState extends State<EnterResult> {
               ),
               child: InkWell(
                 onTap: () {
-                  for (int i = 0; i < subjectlist.length; i++) {
-                    FirebaseFirestore.instance
-                        .collection('Student')
-                        .doc((enrollment.dropDownValue!.name).toString())
-                        .collection(semester.toString())
-                        .doc(subjectlist[i])
-                        .set(
-                      {
-                        'Subject': subjectlist[i],
-                        'Marks': int.parse(marklist[i].text),
-                      },
-                    );
+                  if (enrollment.dropDownValue != null) {
+                    getlist.addsubjectresult(
+                        enrollment.dropDownValue!.name.toString(),
+                        semester.toString(),
+                        subjectlist,
+                        marklist);
                   }
+
                   Navigator.pop(context);
                   ScaffoldMessenger(
                     child: Text(

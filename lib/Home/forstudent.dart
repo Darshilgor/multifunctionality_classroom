@@ -6,8 +6,8 @@ import 'package:my_app/Home/liveclass/liveclass.dart';
 import 'package:my_app/Home/profile/profile.dart';
 import 'package:my_app/notification_services.dart';
 import 'package:my_app/utils/Drawer/navbar.dart';
-import 'package:my_app/utils/constant/constants.dart';
 
+import '../utils/constant/constants.dart';
 import 'dashboard/dashboard.dart';
 import 'package:http/http.dart' as http;
 
@@ -26,9 +26,10 @@ class _HomeState extends State<ForStudent> {
   @override
   void initState() {
     super.initState();
-    //getting sharedpreference value of user type and id type
-    // setLocalData(uType, uId);
-    // getLocalData();
+    
+    // 
+    print(uType);
+    print(uId);
     notificationservices.requestnotificationpermission();
     notificationservices.firebaseinit();
     notificationservices.ontokenrefresh();
@@ -53,7 +54,8 @@ class _HomeState extends State<ForStudent> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const Navbar(),
+      drawer: Navbar(),
+      // drawer: const Navbar(),
       appBar: AppBar(
         centerTitle: true,
         elevation: 6,

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:my_app/Home/forstudent.dart';
 
 import 'package:my_app/firebase_options.dart';
+import 'package:my_app/utils/constant/constants.dart';
 import 'package:my_app/utils/login/choise.dart';
 
 Future main(List<String> args) async {
@@ -21,27 +22,48 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print('initializeApp');
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    print(uType);
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: "MyApp",
-      home: StreamBuilder(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: ((context, snapshot) {
-          // if user login
-          if (snapshot.hasData) {
-            return ForStudent();
-          }
-          //user not login
-          else {
-            return Choise();
-          }
-        }),
-      ),
+      home: FutureBuilder(
+          future: getLocalData(),
+          builder: (context, future) {
+            return StreamBuilder(
+              stream: FirebaseAuth.instance.authStateChanges(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                if (snapshot.hasData) {
+                  print(uType);
+                  if (uType.isNotEmpty) {
+                    return ForStudent();
+                  } else {
+                    return Choise();
+                  }
+                }
+                return Choise();
+              },
+            );
+          }),
     );
   }
 }

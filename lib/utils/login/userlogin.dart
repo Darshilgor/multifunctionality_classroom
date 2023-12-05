@@ -23,13 +23,20 @@ class _UserLogInState extends State<UserLogIn> {
 
   var emailId = '';
   var password = '';
+  @override
+  void initState() {
+    super.initState();
+    setLocalData(widget.user, widget.idType);
+    print('User Type in UserLogin Page$uType');
+    print('User Type in UserLogin Page$uId');
+  }
 
-  // @override
-  // void dispose() {
-  //   idcontroller.dispose();
-  //   passwordcontroller.dispose();
-  //   super.dispose();
-  // }
+  @override
+  void dispose() {
+    super.dispose();
+    passwordcontroller.dispose();
+    idcontroller.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -157,21 +164,27 @@ class _UserLogInState extends State<UserLogIn> {
         );
       },
     );
-    await getEmail(widget.user, idcontroller.text);
-
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      await getEmail(collection, id);
+      print(emailId);
+      await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
         email: emailId,
-        password: passwordcontroller.text,
-      );
-
-      Navigator.popUntil(context, (route) => false);
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const ForStudent(),
-        ),
-      );
+        password: passwordcontroller.text.toString(),
+      )
+          .then((value) async {
+            uType=collection;
+            uId=id;
+                  await setLocalData(collection, id);
+        await getloginuserdata(collection, id);
+        Navigator.popUntil(context, (route) => false);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ForStudent(),
+          ),
+        );
+      });
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         wrongemailmessage();
@@ -181,14 +194,14 @@ class _UserLogInState extends State<UserLogIn> {
         print(e);
       }
     }
-    uType = widget.user;
-    uId = idcontroller.text;
 
-    print(uType);
-    print(uId);
+    print('User Type in UserLogIn${collection}');
+    print('User Id in UserLogIn$id');
 
-    await setLocalData(uType.toString(), uId.toString());
-
+    if (uType.isNotEmpty && uId.isNotEmpty) {
+      print('Is UserType UserType $uType');
+      print('Is UserId UserId $uId');
+    }
     // FirebaseFirestore.instance
     //     .collection(uType.toString())
     //     .doc(uId.toString())
@@ -205,13 +218,13 @@ class _UserLogInState extends State<UserLogIn> {
     // print(spi2);
     // print(spi3);
     // print(spi4);
-    print(firstname);
-    print(midlename);
-    print(lastname);
-    print(branch);
-    print(cpi);
-    print(phone);
-    print(spilist);
+    // print(firstname);
+    // print(midlename);
+    // print(lastname);
+    // print(branch);
+    // print(cpi);
+    // print(phone);
+    // print(spilist);
     // print(enrollmentno);
     // print(semester);
     // print("Student Semester IS $studentsemester");
@@ -266,18 +279,23 @@ class _UserLogInState extends State<UserLogIn> {
   //getting use email method
   Future getEmail(String collection, String id) async {
     try {
+      print(collection);
+      print(id);
       await FirebaseFirestore.instance
           .collection(collection)
           .doc(id)
           .get()
           .then(
         (value) {
-          emailId = value['Email'];
+          setState(() {
+            emailId = value['Email'];
+          });
         },
       );
-      setState(() {});
+      print('Email For LogIn Is In UserLogIn Is $emailId');
     } on FirebaseException catch (e) {
       print(e.message);
     }
+    return emailId;
   }
 }

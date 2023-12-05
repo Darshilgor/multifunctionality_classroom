@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_textfield/dropdown_textfield.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/src/widgets/editable_text.dart';
+import 'package:my_app/utils/constant/constants.dart';
 
 class GetList {
   Future<List<DropDownValueModel>> getteachernamelist() async {
@@ -329,5 +332,154 @@ class GetList {
     // }
     print(subjectlist);
     return subjectlist;
+  }
+
+  Future<List<DropDownValueModel>> getsemesterlistforresult() async {
+    List<String> semesterListForResult = [];
+    List<String> semesterlistwithrange = [];
+    List<DropDownValueModel> dropdownsemesterlist = [];
+    await FirebaseFirestore.instance.collection('Semester').get().then(
+      (QuerySnapshot snapshot) {
+        snapshot.docs.forEach(
+          (element) {
+            semesterListForResult.add(element["Semester No"].toString());
+          },
+        );
+      },
+    );
+    semesterlistwithrange =
+        semesterListForResult.getRange(0, semester).toList();
+    print('Semester List With Range in GetList Is ${semesterlistwithrange}');
+
+    for (int i = 0; i < semesterlistwithrange.length; i++) {
+      dropdownsemesterlist.add(
+        DropDownValueModel(
+          name: semesterlistwithrange[i],
+          value: semesterlistwithrange[i],
+        ),
+      );
+    }
+// List<dropdownva> dropdownValueModels = semesterListForResult.map((e) => DropdownValueModel(e)).toList();
+    // List semesterlistforresult = [];
+    // List dropdownsemesterlistforresult = [];
+    // await FirebaseFirestore.instance.collection('Semester').get().then(
+    //   (QuerySnapshot snapshot) {
+    //     snapshot.docs.forEach(
+    //       (element) {
+    //         semesterlistforresult.add(
+    //           element['Semester No'],
+    //         );
+    //       },
+    //     );
+    // semesterlistforresult.getRange(1, semester);
+    // semesterlistforresult.addAll(
+    //   await FirebaseFirestore.instance.collection('Semester').get().then(
+    //     (QuerySnapshot snapshot) {
+    //       return snapshot.docs
+    //           .map((doc) => doc.data())
+    //           .toList()
+    //           .getRange(1, min(semester, snapshot.docs.length))
+    //           .toList();
+    //     },
+    //   ),
+    // );
+    // print('Semester List for Specific Student$semesterlistforresult');
+    // for (int i = 0; i < semesterlistforresult.length; i++) {
+    //   dropdownsemesterlistforresult.add(
+    //     DropDownValueModel(
+    //       name: '',
+    //       value: semesterlistforresult[i],
+    //     ),
+    //   );
+    // }
+    return dropdownsemesterlist;
+  }
+
+  Future addsubjectresult(String enrollment, String semester,
+      List<String> subjectlist, List<TextEditingController> marklist) async {
+    for (int i = 0; i < subjectlist.length; i++) {
+      print('Gor Is Already Reached Here Dont Worry.');
+
+      FirebaseFirestore.instance
+          .collection('Student')
+          .doc(enrollment)
+          .collection(semester)
+          .doc(subjectlist[i])
+          .set(
+        {
+          'Subject': subjectlist[i],
+          'Marks': int.parse(marklist[i].text),
+        },
+      ).whenComplete(
+        () {
+          print('Also Gor Is Already Reached Here Dont Worry.');
+          getlist.calculatespi(enrollment, semester);
+        },
+      );
+    }
+  }
+
+  Future<double> calculatespi(String enrollment, String semester) async {
+    double marks = 0;
+    double spi = 0;
+    int snapshotlength = 0;
+    await FirebaseFirestore.instance
+        .collection('Student')
+        .doc(enrollment)
+        .collection(semester)
+        .get()
+        .then(
+      (QuerySnapshot snapshot) {
+        snapshot.docs.forEach(
+          (element) {
+            snapshotlength = snapshot.docs.length;
+            marks += element['Marks'];
+          },
+        );
+        spi = ((marks / snapshotlength) / 10);
+        print('SPI Is In GetList By Darshil Is $spi');
+      },
+    ).whenComplete(
+      () async {
+        await FirebaseFirestore.instance
+            .collection('Student')
+            .doc(enrollment)
+            .update(
+          {
+            'SPI$semester': spi,
+          },
+        );
+      },
+    );
+    double sumofspi = 0;
+    double cpi = 0;
+    await FirebaseFirestore.instance
+        .collection('Student')
+        .doc(enrollment)
+        .get()
+        .then(
+      (value) {
+        for (int i = 1; i <= int.parse(semester); i++) {
+          sumofspi += value['SPI$i'];
+          print('Sum Of Marks is In GetList $sumofspi');
+        }
+        ;
+      },
+    ).whenComplete(
+      () async {
+        cpi = sumofspi / int.parse(semester);
+        await FirebaseFirestore.instance
+            .collection('Student')
+            .doc(enrollment)
+            .update(
+          {
+            'CPI': cpi,
+          },
+        );
+      },
+    );
+    print('CPI Is In GetList Is $cpi');
+    print('SPI Added Successfully in GetList......');
+    return spi;
   }
 }

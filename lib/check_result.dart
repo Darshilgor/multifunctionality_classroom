@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_textfield/dropdown_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:my_app/utils/constant/constants.dart';
+import 'package:my_app/utils/constant/getlist.dart';
 
 class Check_Result extends StatefulWidget {
   const Check_Result({super.key});
@@ -14,7 +15,7 @@ class _Check_ResultState extends State<Check_Result> {
   final semesterkey = GlobalKey<FormState>();
   List<String> semesters = [];
   List<DropDownValueModel> semesterlist = [];
-  late SingleValueDropDownController semester;
+  late SingleValueDropDownController semestercontroller;
   List<String> Subject = [];
   List<double> marks = [];
   List<double> listofspi = [];
@@ -29,12 +30,13 @@ class _Check_ResultState extends State<Check_Result> {
   double sumofspi = 0;
   double CPI = 0;
   int ssemester = 0;
+  GetList getlist = GetList();
   @override
   void initState() {
     super.initState();
-    getsemesterlist();
-    semester = SingleValueDropDownController();
-    getstudentdata();
+    // getsemesterlist();
+    semestercontroller = SingleValueDropDownController();
+    // getstudentdata();
   }
 
   Widget build(BuildContext context) {
@@ -52,9 +54,10 @@ class _Check_ResultState extends State<Check_Result> {
         child: Column(
           children: [
             createstudentdropdown(context, "Select Semester", semesterlist,
-                semester, true, "Select Select", semesterkey),
-            if (semester.dropDownValue != null)
-              getresultdetails(semester.dropDownValue!.name.toString()),
+                semestercontroller, true, "Select Select", semesterkey),
+            // if (semestercontroller.dropDownValue != null)
+            //   getresultdetails(
+            //       semestercontroller.dropDownValue!.name.toString()),
             SizedBox(
               height: 20,
             ),
@@ -77,7 +80,7 @@ class _Check_ResultState extends State<Check_Result> {
             SizedBox(
               height: 20,
             ),
-            if (semester.dropDownValue != null) showcpi(),
+            if (semestercontroller.dropDownValue != null) showcpi(),
           ],
         ),
       ),
@@ -85,7 +88,8 @@ class _Check_ResultState extends State<Check_Result> {
   }
 
   showcpi() {
-    if (ssemester.toString() == semester.dropDownValue!.name.toString()) {
+    if (ssemester.toString() ==
+        semestercontroller.dropDownValue!.name.toString()) {
       return Column(
         children: [
           Align(
@@ -112,38 +116,38 @@ class _Check_ResultState extends State<Check_Result> {
   }
 
   Future getsemesterlist() async {
-    await FirebaseFirestore.instance.collection('Semester').get().then(
-      (QuerySnapshot snapshot) {
-        snapshot.docs.forEach(
-          (element) {
-            setState(
-              () {
-                semesters.add(
-                  element['Semester No'],
-                );
-              },
-            );
-          },
-        );
-        setState(() {
-          sem = semesters.getRange(0, 5).toList();
-        });
-        for (int i = 0; i < sem.length; i++) {
-          setState(
-            () {
-              semesterlist.add(
-                DropDownValueModel(
-                  name: sem[i],
-                  value: sem[i],
-                ),
-              );
-            },
-          );
-        }
-      },
-    );
-    getlistofmarksandsubject(sem);
-    return sem;
+    // await FirebaseFirestore.instance.collection('Semester').get().then(
+    //   (QuerySnapshot snapshot) {
+    //     snapshot.docs.forEach(
+    //       (element) {
+    //         setState(
+    //           () {
+    //             semesters.add(
+    //               element['Semester No'],
+    //             );
+    //           },
+    //         );
+    //       },
+    //     );
+    //     setState(() {
+    //       sem = semesters.getRange(0, 5).toList();
+    //     });
+    //     for (int i = 0; i < sem.length; i++) {
+    //       setState(
+    //         () {
+    //           semesterlist.add(
+    //             DropDownValueModel(
+    //               name: sem[i],
+    //               value: sem[i],
+    //             ),
+    //           );
+    //         },
+    //       );
+    //     }
+    //   },
+    // );
+    // getlistofmarksandsubject(sem);
+    // return sem;
   }
 
   createstudentdropdown(
@@ -154,59 +158,68 @@ class _Check_ResultState extends State<Check_Result> {
       bool bool,
       String errormessage,
       GlobalKey<FormState> branchkey) {
+    List<DropDownValueModel>? list = [];
     return Column(
       children: [
         Form(
           key: branchkey,
-          child: DropDownTextField(
-            onChanged: (value) {
-              setState(() {
-                marks.removeRange(0, marks.length);
-                sum = 0;
-                getsumofmarks(semester.dropDownValue!.name.toString());
-              });
-            },
-            isEnabled: bool,
-            dropDownList: semesterlist,
-            validator: (value) {
-              if (semester.dropDownValue == null) {
-                return errormessage;
-              } else if (semester.dropDownValue!.name.isEmpty) {
-                return errormessage;
-              } else {
-                return null;
-              }
-            },
-            controller: semester,
-            dropDownItemCount: 5,
-            dropdownRadius: 10,
-            textFieldDecoration: InputDecoration(
-              labelText: labeltext,
-              disabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Colors.grey,
-                ),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  width: 2,
-                  color: Theme.of(context).primaryColor,
-                ),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              errorBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Colors.red,
-                ),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey),
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-          ),
+          child: FutureBuilder(
+              future: getlist.getsemesterlistforresult(),
+              builder: (context, future) {
+                if (future.hasData) {
+                  list = future.data;
+                  return DropDownTextField(
+                    onChanged: (value) {
+                      setState(() {
+                        marks.removeRange(0, marks.length);
+                        sum = 0;
+                        getsumofmarks(semester.dropDownValue!.name.toString());
+                      });
+                    },
+                    isEnabled: bool,
+                    dropDownList: list!,
+                    validator: (value) {
+                      if (semester.dropDownValue == null) {
+                        return errormessage;
+                      } else if (semester.dropDownValue!.name.isEmpty) {
+                        return errormessage;
+                      } else {
+                        return null;
+                      }
+                    },
+                    controller: semester,
+                    dropDownItemCount: 5,
+                    dropdownRadius: 10,
+                    textFieldDecoration: InputDecoration(
+                      labelText: labeltext,
+                      disabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.grey,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          width: 2,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  );
+                }
+                return Text("data");
+              }),
         ),
         SizedBox(
           height: 15,
@@ -286,6 +299,7 @@ class _Check_ResultState extends State<Check_Result> {
             setState(
               () {
                 marks.add(double.parse(element['Marks']));
+                print('List of Marks in Check Result File Is $marks');
               },
             );
           },
@@ -306,7 +320,7 @@ class _Check_ResultState extends State<Check_Result> {
     print(sum);
     average = (sum / marks.length) / 10;
     print(average);
-    print("Average Is $average");
+    print("Average Is In Check Result Is $average");
     return average;
   }
 
@@ -386,16 +400,16 @@ class _Check_ResultState extends State<Check_Result> {
     print("finally CPI added");
   }
 
-  Future getstudentdata() async {
-    await FirebaseFirestore.instance
-        .collection('Student')
-        .doc(uId)
-        .get()
-        .then((value) {
-      setState(() {
-        ssemester = value['Semester'];
-      });
-      print(ssemester);
-    });
-  }
+  // Future getstudentdata() async {
+  //   await FirebaseFirestore.instance
+  //       .collection('Student')
+  //       .doc(uId)
+  //       .get()
+  //       .then((value) {
+  //     setState(() {
+  //       ssemester = value['Semester'];
+  //     });
+  //     print(ssemester);
+  //   });
+  // }
 }

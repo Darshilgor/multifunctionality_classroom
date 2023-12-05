@@ -11,12 +11,11 @@ import 'package:my_app/utils/Drawer/teacherlist/teacherlist.dart';
 import 'package:my_app/utils/constant/constants.dart';
 import 'package:my_app/utils/login/choise.dart';
 
-void main(List<String> args) {
-  runApp(
-    const MyApp(),
-  );
-}
-
+// void main(List<String> args) {
+//   runApp(
+//     const MyApp(),
+//   );
+// }
 class Navbar extends StatefulWidget {
   const Navbar({super.key});
 
@@ -37,7 +36,7 @@ class _NavbarState extends State<Navbar> {
   void initState() {
     super.initState();
     getLocalData();
-    // userData();
+    userData();
   }
 
   @override
@@ -222,7 +221,7 @@ class _NavbarState extends State<Navbar> {
             onTap: () {
               FirebaseAuth.instance.signOut();
               {
-                Navigator.push(context,
+                Navigator.pushReplacement(context,
                     MaterialPageRoute(builder: (context) => const Choise()));
               }
             },

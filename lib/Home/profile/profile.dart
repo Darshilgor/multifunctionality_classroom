@@ -24,10 +24,10 @@ class _ProfileState extends State<Profile> {
   String mname = '';
   String lname = '';
   String mail = '';
-  String phone = '';
+  num phone = 0;
   String course = '';
-  String semester = '';
-  String year = '';
+  int semester = 0;
+  int year = 0;
   String enrollment = '';
   String id = '';
   String department = '';
@@ -79,11 +79,11 @@ class _ProfileState extends State<Profile> {
                 children: [
                   addProfileField('Enrollment No', enrollment),
                   addProfileField('Email', mail),
-                  addProfileField('Phone No', phone),
+                  addProfileField('Phone No', phone.toString()),
                   addProfileField('Account Type', accounttype),
                   addProfileField('Branch', course),
-                  addProfileField('Semester', semester),
-                  addProfileField('Year', year),
+                  addProfileField('Semester', semester.toString()),
+                  addProfileField('Year', year.toString()),
                 ],
               ),
             ),
@@ -94,10 +94,10 @@ class _ProfileState extends State<Profile> {
                 children: [
                   addProfileField('Admin Id', adminid),
                   addProfileField('Email', mail),
-                  addProfileField('Phone No', phone),
+                  addProfileField('Phone No', phone.toString()),
                   addProfileField('Account Type', accounttype),
                   addProfileField('Department', department),
-                  addProfileField('Year', year),
+                  addProfileField('Year', year.toString()),
                 ],
               ),
             ),
@@ -108,10 +108,10 @@ class _ProfileState extends State<Profile> {
                 children: [
                   addProfileField('Teacher Id', teacherid),
                   addProfileField('Email', mail),
-                  addProfileField('Phone No', phone),
+                  addProfileField('Phone No', phone.toString()),
                   addProfileField('Account Type', accounttype),
                   addProfileField('Department', department),
-                  addProfileField('Year', year),
+                  addProfileField('Year', year.toString()),
                 ],
               ),
             ),
@@ -124,7 +124,7 @@ class _ProfileState extends State<Profile> {
                 onPressed: () {
                   FirebaseAuth.instance.signOut();
                   {
-                    Navigator.push(
+                    Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: (context) => Choise(),

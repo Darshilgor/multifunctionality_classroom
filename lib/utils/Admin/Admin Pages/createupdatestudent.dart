@@ -744,7 +744,7 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
         .doc(id)
         .delete()
         .whenComplete(
-      () {  
+      () {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -884,40 +884,55 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
       String labeltext,
       String hinttext,
       GlobalKey<FormState> key) {
+    List<DropDownValueModel> list = [];
     return Column(
       children: [
         Form(
           key: key,
-          child: TextFormField(
-            maxLength: (labeltext == 'Phone No') ? 10 : 1000,
-            validator: (value) {
-              if (controller.text.toString() == null) {
-                return errormessage;
-              } else if (controller.text.toString().isEmpty) {
-                return errormessage;
-              } else {
-                return null;
-              }
-            },
-            controller: controller,
-            decoration: InputDecoration(
-              counterText: '',
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 13,
-                vertical: 23,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(
-                  width: 1,
-                  style: BorderStyle.solid,
-                ),
-              ),
-              label: Text(labeltext),
-              hintText: hinttext,
-              labelStyle: const TextStyle(fontSize: 20),
-            ),
-          ),
+          child: FutureBuilder(
+              future: getlist.getstudentenrollmentlist(),
+              builder: (context, future) {
+                if (future.hasData) {
+                  list = future.data!;
+                }
+                return TextFormField(
+                  maxLength: (labeltext == 'Phone No') ? 10 : 1000,
+                  validator: (value) {
+                    if (labeltext == 'Student Enrollment') {
+                      if (list.contains(DropDownValueModel(
+                          name: studentenrollment.text,
+                          value: studentenrollment.text))) {
+                        return 'Enrollment No is already exits...';
+                      }
+                    }
+                    if (controller.text.toString() == null) {
+                      return errormessage;
+                    } else if (controller.text.toString().isEmpty) {
+                      return errormessage;
+                    } else {
+                      return null;
+                    }
+                  },
+                  controller: controller,
+                  decoration: InputDecoration(
+                    counterText: '',
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 13,
+                      vertical: 23,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(
+                        width: 1,
+                        style: BorderStyle.solid,
+                      ),
+                    ),
+                    label: Text(labeltext),
+                    hintText: hinttext,
+                    labelStyle: const TextStyle(fontSize: 20),
+                  ),
+                );
+              }),
         ),
         SizedBox(
           height: 15,
@@ -1094,6 +1109,9 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
               builder: (context, future) {
                 if (future.hasData) {
                   return DropDownTextField(
+                    onChanged: (value) {
+                      setState(() {});
+                    },
                     isEnabled: bool,
                     dropDownList: future.data!,
                     validator: (value) {

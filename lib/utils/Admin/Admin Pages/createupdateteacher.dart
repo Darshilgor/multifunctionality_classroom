@@ -534,40 +534,59 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
       String labeltext,
       String hinttext,
       GlobalKey<FormState> key) {
+    List<DropDownValueModel> list = [];
     return Column(
       children: [
         Form(
           key: key,
-          child: TextFormField(
-            maxLength: (labeltext == 'Phone No') ? 10 : 1000,
-            controller: controller,
-            validator: (value) {
-              if (firstnamecontroller == null) {
-                return errormessage;
-              } else if (firstnamecontroller.text.toString().isEmpty) {
-                return errormessage;
-              } else {
-                return null;
-              }
-            },
-            decoration: InputDecoration(
-              counterText: "",
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 13,
-                vertical: 23,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(
-                  width: 1,
-                  style: BorderStyle.solid,
-                ),
-              ),
-              label: Text(labeltext),
-              hintText: hinttext,
-              labelStyle: const TextStyle(fontSize: 20),
-            ),
-          ),
+          child: FutureBuilder(
+              future: getlist.getteachernamelist(),
+              builder: (context, future) {
+                if (future.hasData) {
+                  list = future.data!;
+                }
+                return TextFormField(
+                  maxLength: (labeltext == 'Phone No') ? 10 : 1000,
+                  controller: controller,
+                  validator: (value) {
+                    if (controller == null) {
+                      return errormessage;
+                    } else if (controller.text.toString().isEmpty) {
+                      return errormessage;
+                    }
+                    if (labeltext == 'Teacher Id' &&
+                        teacheridcontroller != null) {
+                      if (list.contains(DropDownValueModel(
+                          name: teacheridcontroller.text.toString(),
+                          value: teacheridcontroller.text.toString()))) {
+                        print('Label Text Is Teacher Id');
+                        print('List is in CreateUpdateTeacher File Is $list');
+                        print("This Teacher Id Already Exists");
+                        return 'Teacher Id is Already exits';
+                      }
+                    } else {
+                      return null;
+                    }
+                  },
+                  decoration: InputDecoration(
+                    counterText: "",
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 13,
+                      vertical: 23,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(
+                        width: 1,
+                        style: BorderStyle.solid,
+                      ),
+                    ),
+                    label: Text(labeltext),
+                    hintText: hinttext,
+                    labelStyle: const TextStyle(fontSize: 20),
+                  ),
+                );
+              }),
         ),
         const SizedBox(
           height: 15,
@@ -737,6 +756,9 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
                     List<DropDownValueModel>? list = future.data;
                     if (list != null) {
                       return DropDownTextField(
+                        onChanged: (value) {
+                          setState(() {});
+                        },
                         isEnabled: bool,
                         dropDownList: list,
                         validator: (value) {
@@ -916,6 +938,8 @@ class _CreateUpdateTeacherState extends State<CreateUpdateTeacher> {
 
 // method of submit process
   Future submit(BuildContext context, String id) async {
+    List<DropDownValueModel> list = await getlist.getteachernamelist();
+
     if (createfirstnamekey.currentState!.validate() &&
         createmidlenamekey.currentState!.validate() &&
         createlastnamekey.currentState!.validate() &&

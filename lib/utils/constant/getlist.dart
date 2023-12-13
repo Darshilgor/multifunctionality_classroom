@@ -7,8 +7,6 @@ import 'package:flutter/src/widgets/editable_text.dart';
 import 'package:my_app/utils/constant/constants.dart';
 
 class GetList {
-
-
   Future<List<DropDownValueModel>> getteachernamelist() async {
     List<DropDownValueModel> teacheridlist = [];
     List<String> teacherids = [];
@@ -484,4 +482,10 @@ class GetList {
     print('SPI Added Successfully in GetList......');
     return spi;
   }
+
+//   Future getrequesteddocumentlist()
+//  async {
+//   await FirebaseFirestore.instance.collection('Teacher').doc(uId).collection('Document Request').doc('Bonafite Certificate').
+
+//   }
 }

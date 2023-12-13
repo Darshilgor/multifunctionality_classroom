@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:my_app/utils/constant/constants.dart';
 
 class Request_Document extends StatefulWidget {
@@ -69,10 +72,16 @@ class _Request_DocumentState extends State<Request_Document> {
               onTap: () {
                 if (requestedDocuments.contains(labeltext)) {
                   requestedDocuments.remove(labeltext);
+                  print('$labeltext remove in requested documents');
+                  print(requestedDocuments);
                 } else {
                   requestedDocuments.add(labeltext);
+                  print('$labeltext added in requested documents');
+                  print(requestedDocuments);
                 }
-                setState(() {});
+                setState(() {
+                  print(requestedDocuments);
+                });
               },
               child: Center(
                 child: Container(
@@ -113,11 +122,9 @@ class _Request_DocumentState extends State<Request_Document> {
       children: [
         InkWell(
           onTap: () {
-            print('OnTapped');
             sendrequesttoteacher(studentfirstname, studentlastname, classname,
                 branchname, bonafiteflag, admissionflag);
             Navigator.pop(context);
-            SnackBar(content: Text("Your Request Has been send"));
           },
           child: Container(
             width: MediaQuery.of(context).size.width * 0.95,
@@ -179,58 +186,88 @@ class _Request_DocumentState extends State<Request_Document> {
             if ((element['Department'] == branchname) &&
                 (element['Class'] == classname)) {
               teacherid = element['TID'];
-              print(
-                element['First Name'],
-              );
+              print(requestedDocuments);
             }
           },
         );
       },
     );
-    try {
-      if (requestedDocuments.contains("Bonafite Certificate")) {
-        await FirebaseFirestore.instance
-            .collection('Teacher')
-            .doc(teacherid)
-            .collection('Document Request')
-            .doc('Bonafite Certificate')
-            .collection(uId.toString())
-            .doc('$studentfirstname $studentlastname'.toString())
-            .set(
-              {
-                'First Name': studentfirstname,
-                'Last Name': studentlastname,
-                'Class': classname,
-                'Branch': branchname,
-                'Status': 'Pending',
-              },
-            )
-            .then((value) => print("done1"))
-            .onError((error, stackTrace) => print(error));
-      }
-      if (requestedDocuments.contains("Admission Latter")) {
-        await FirebaseFirestore.instance
-            .collection('Teacher')
-            .doc(teacherid)
-            .collection('Document Request')
-            .doc('Admission Later')
-            .collection(uId)
-            .doc(studentfirstname + ' ' + studentlastname)
-            .set(
-              {
-                'Enrollment No': uId,
-                'First Name': studentfirstname,
-                'Last Name': studentlastname,
-                'Status': 'Pending',
-              },
-            )
-            .then((value) => print("done2"))
-            .onError((error, stackTrace) => print(error));
-      }
-    } on FirebaseException catch (e) {
-      print(e);
+    if (requestedDocuments.contains('Bonafite Certificate')) {
+      bool exitsbonafite = false;
+      print('true');
+      await FirebaseFirestore.instance
+          .collection('Teacher')
+          .doc(teacherid)
+          .collection('Bonafite Certificate')
+          .get()
+          .then((QuerySnapshot snapshot) {
+        print('true');
+        snapshot.docs.forEach((element) async {
+          for (int i = 0; i < snapshot.docs.length; i++) {
+            if (uId == element['Enrollment No']) {
+              exitsbonafite = !exitsbonafite;
+              Fluttertoast.showToast(msg: 'Already send bonifite request');
+              break;
+            }
+          }
+          if (exitsbonafite == false) {
+            await FirebaseFirestore.instance
+                .collection('Teacher')
+                .doc(teacherid)
+                .collection('Bonafite Certificate')
+                .doc(uId)
+                .set({
+              'First Name': studentfirstname,
+              'Last Name': studentlastname,
+              'Enrollment No': uId,
+              'Branch': branchname,
+              'Class': classname,
+              'Status': 'pending',
+            });
+            Fluttertoast.showToast(
+                msg: 'Bonafite certificate request send successfully');
+          }
+        });
+      });
     }
-
-    print('All Done');
+    if (requestedDocuments.contains("Admission Latter")) {
+      bool exitadmission = false;
+      await FirebaseFirestore.instance
+          .collection('Teacher')
+          .doc(teacherid)
+          .collection('Admission Latter')
+          .get()
+          .then(
+        (QuerySnapshot snapshot) {
+          snapshot.docs.forEach((element) async {
+            for (int i = 0; i < snapshot.docs.length; i++) {
+              if (uId == element['Enrollment No']) {
+                exitadmission = !exitadmission;
+                Fluttertoast.showToast(
+                    msg: 'Already send admission latter request');
+                break;
+              }
+            }
+            if (exitadmission == false) {
+              await FirebaseFirestore.instance
+                  .collection('Teacher')
+                  .doc(teacherid)
+                  .collection('Admission Latter')
+                  .doc(uId)
+                  .set({
+                'First Name': studentfirstname,
+                'Last Name': studentlastname,
+                'Enrollment No': uId,
+                'Branch': branchname,
+                'Class': classname,
+                'Status': 'pending',
+              });
+              Fluttertoast.showToast(
+                  msg: 'Admission Latter Request send successfully');
+            }
+          });
+        },
+      );
+    }
   }
 }

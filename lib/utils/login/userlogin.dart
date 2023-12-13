@@ -173,9 +173,9 @@ class _UserLogInState extends State<UserLogIn> {
         password: passwordcontroller.text.toString(),
       )
           .then((value) async {
-            uType=collection;
-            uId=id;
-                  await setLocalData(collection, id);
+        uType = collection;
+        uId = id;
+        await setLocalData(collection, id);
         await getloginuserdata(collection, id);
         Navigator.popUntil(context, (route) => false);
         Navigator.push(
@@ -279,23 +279,92 @@ class _UserLogInState extends State<UserLogIn> {
   //getting use email method
   Future getEmail(String collection, String id) async {
     try {
-      print(collection);
-      print(id);
-      await FirebaseFirestore.instance
-          .collection(collection)
-          .doc(id)
-          .get()
-          .then(
-        (value) {
-          setState(() {
-            emailId = value['Email'];
-          });
+      await FirebaseFirestore.instance.collection(collection).get().then(
+        (QuerySnapshot snapshot) {
+          snapshot.docs.forEach(
+            (element) async {
+              if (collection == 'Student') {
+                if (id == element['Enrollment No']) {
+                  await FirebaseFirestore.instance
+                      .collection(collection)
+                      .doc(id)
+                      .get()
+                      .then(
+                    (value) {
+                      setState(
+                        () {
+                          emailId = value['Email'];
+                        },
+                      );
+                    },
+                  );
+                } else {
+                  wrongemailmessage();
+                }
+              } else if (collection == 'Teacher') {
+                if (id == element['TID']) {
+                  await FirebaseFirestore.instance
+                      .collection(collection)
+                      .doc(id)
+                      .get()
+                      .then(
+                    (value) {
+                      setState(
+                        () {
+                          emailId = value['Email'];
+                        },
+                      );
+                    },
+                  );
+                } else {
+                  wrongemailmessage();
+                }
+              } else if (collection == 'Admin') {
+                if (id == element['AID']) {
+                  await FirebaseFirestore.instance
+                      .collection(collection)
+                      .doc(id)
+                      .get()
+                      .then(
+                    (value) {
+                      setState(
+                        () {
+                          emailId = value['Email'];
+                        },
+                      );
+                    },
+                  );
+                } else {
+                  wrongemailmessage();
+                }
+              }
+              setState(() {});
+            },
+          );
         },
       );
-      print('Email For LogIn Is In UserLogIn Is $emailId');
     } on FirebaseException catch (e) {
-      print(e.message);
+      print(e);
     }
+    // try {
+    //   print(collection);
+    //   print(id);
+
+    //   // await FirebaseFirestore.instance
+    //   //     .collection(collection)
+    //   //     .doc(id)
+    //   //     .get()
+    //   //     .then(
+    //   //   (value) {
+    //   //     setState(() {
+    //   //       emailId = value['Email'];
+    //   //     });
+    //   //   },
+    //   // );
+    //   print('Email For LogIn Is In UserLogIn Is $emailId');
+    // } on FirebaseException catch (e) {
+    //   print(e.message);
+    // }
     return emailId;
   }
 }

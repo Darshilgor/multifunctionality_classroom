@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -23,14 +21,21 @@ class _UserLogInState extends State<UserLogIn> {
   TextEditingController passwordcontroller =
       TextEditingController(); //user password controller
 
-  var emailId = 'gordarshil2002@gmail.com';
-  var password = 'Password';
+  var emailId = '';
+  var password = '';
+  @override
+  void initState() {
+    super.initState();
+    setLocalData(widget.user, widget.idType);
+    print('User Type in UserLogin Page$uType');
+    print('User Type in UserLogin Page$uId');
+  }
 
   @override
   void dispose() {
-    idcontroller.dispose();
-    passwordcontroller.dispose();
     super.dispose();
+    passwordcontroller.dispose();
+    idcontroller.dispose();
   }
 
   @override
@@ -159,21 +164,27 @@ class _UserLogInState extends State<UserLogIn> {
         );
       },
     );
-    await getEmail(widget.user, idcontroller.text);
-
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      await getEmail(collection, id);
+      print(emailId);
+      await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
         email: emailId,
-        password: passwordcontroller.text,
-      );
-
-      Navigator.popUntil(context, (route) => false);
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const ForStudent(),
-        ),
-      );
+        password: passwordcontroller.text.toString(),
+      )
+          .then((value) async {
+        uType = collection;
+        uId = id;
+        await setLocalData(collection, id);
+        await getloginuserdata(collection, id);
+        Navigator.popUntil(context, (route) => false);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ForStudent(),
+          ),
+        );
+      });
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         wrongemailmessage();
@@ -183,30 +194,46 @@ class _UserLogInState extends State<UserLogIn> {
         print(e);
       }
     }
-    uType = widget.user;
-    uId = idcontroller.text;
 
-    print(uType);
-    print(uId);
-    await setLocalData(uType.toString(), uId.toString());
-    FirebaseFirestore.instance
-        .collection(uType.toString())
-        .doc(uId.toString())
-        .get()
-        .then((value) {
-      userfirstname = value['First Name'];
-      userlastname = value['Last Name'];
-      userprofilephoto = value['Profile Photo'];
-      if (uType == 'Student') {
-        studentsemester = value['Semester'];
-      }
-      print(userfirstname);
-    });
-    FirebaseFirestore.instance.collection('Classes').doc('E').get().then(
-      (value) {
-        className = value['Class Name'];
-      },
-    );
+    print('User Type in UserLogIn${collection}');
+    print('User Id in UserLogIn$id');
+
+    if (uType.isNotEmpty && uId.isNotEmpty) {
+      print('Is UserType UserType $uType');
+      print('Is UserId UserId $uId');
+    }
+    // FirebaseFirestore.instance
+    //     .collection(uType.toString())
+    //     .doc(uId.toString())
+    //     .get()
+    //     .then((value) {
+    //   firstname = value['First Name'];
+    //   lastname = value['Last Name'];
+    //   profilephoto = value['Profile Photo'];
+    //   if (uType == 'Student') {
+    //     studentsemester = value['Semester'];
+    //   }
+    // setState(() {});
+    // print(spi1);
+    // print(spi2);
+    // print(spi3);
+    // print(spi4);
+    // print(firstname);
+    // print(midlename);
+    // print(lastname);
+    // print(branch);
+    // print(cpi);
+    // print(phone);
+    // print(spilist);
+    // print(enrollmentno);
+    // print(semester);
+    // print("Student Semester IS $studentsemester");
+    // });
+    // FirebaseFirestore.instance.collection('Classes').doc('E').get().then(
+    //   (value) {
+    //     className = value['Class Name'];
+    //   },
+    // );
   }
 
   //Wrong email method
@@ -252,16 +279,92 @@ class _UserLogInState extends State<UserLogIn> {
   //getting use email method
   Future getEmail(String collection, String id) async {
     try {
-      await FirebaseFirestore.instance
-          .collection(collection)
-          .doc(id)
-          .get()
-          .then((value) {
-        emailId = value['Email'];
-        setState(() {});
-      });
+      await FirebaseFirestore.instance.collection(collection).get().then(
+        (QuerySnapshot snapshot) {
+          snapshot.docs.forEach(
+            (element) async {
+              if (collection == 'Student') {
+                if (id == element['Enrollment No']) {
+                  await FirebaseFirestore.instance
+                      .collection(collection)
+                      .doc(id)
+                      .get()
+                      .then(
+                    (value) {
+                      setState(
+                        () {
+                          emailId = value['Email'];
+                        },
+                      );
+                    },
+                  );
+                } else {
+                  wrongemailmessage();
+                }
+              } else if (collection == 'Teacher') {
+                if (id == element['TID']) {
+                  await FirebaseFirestore.instance
+                      .collection(collection)
+                      .doc(id)
+                      .get()
+                      .then(
+                    (value) {
+                      setState(
+                        () {
+                          emailId = value['Email'];
+                        },
+                      );
+                    },
+                  );
+                } else {
+                  wrongemailmessage();
+                }
+              } else if (collection == 'Admin') {
+                if (id == element['AID']) {
+                  await FirebaseFirestore.instance
+                      .collection(collection)
+                      .doc(id)
+                      .get()
+                      .then(
+                    (value) {
+                      setState(
+                        () {
+                          emailId = value['Email'];
+                        },
+                      );
+                    },
+                  );
+                } else {
+                  wrongemailmessage();
+                }
+              }
+              setState(() {});
+            },
+          );
+        },
+      );
     } on FirebaseException catch (e) {
-      print(e.message);
+      print(e);
     }
+    // try {
+    //   print(collection);
+    //   print(id);
+
+    //   // await FirebaseFirestore.instance
+    //   //     .collection(collection)
+    //   //     .doc(id)
+    //   //     .get()
+    //   //     .then(
+    //   //   (value) {
+    //   //     setState(() {
+    //   //       emailId = value['Email'];
+    //   //     });
+    //   //   },
+    //   // );
+    //   print('Email For LogIn Is In UserLogIn Is $emailId');
+    // } on FirebaseException catch (e) {
+    //   print(e.message);
+    // }
+    return emailId;
   }
 }

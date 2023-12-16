@@ -1,11 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:my_app/Home/classroom/classroom.dart';
 import 'package:my_app/Home/liveclass/liveclass.dart';
 import 'package:my_app/Home/profile/profile.dart';
+import 'package:my_app/notification_services.dart';
 import 'package:my_app/utils/Drawer/navbar.dart';
-import 'package:my_app/utils/constant/constants.dart';
 
+import '../utils/constant/constants.dart';
 import 'dashboard/dashboard.dart';
+import 'package:http/http.dart' as http;
 
 class ForStudent extends StatefulWidget {
   const ForStudent({
@@ -17,6 +21,26 @@ class ForStudent extends StatefulWidget {
 }
 
 class _HomeState extends State<ForStudent> {
+  notification_Services notificationservices = notification_Services();
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // 
+    print(uType);
+    print(uId);
+    notificationservices.requestnotificationpermission();
+    notificationservices.firebaseinit();
+    notificationservices.ontokenrefresh();
+    notificationservices.getdevicetoken().then(
+          (value) => print(
+            value,
+          ),
+        );
+    sendnotification();
+  }
+
   int index = 0;
   PageStorageBucket bucket = PageStorageBucket();
   final List screens = const [
@@ -26,17 +50,12 @@ class _HomeState extends State<ForStudent> {
     Profile(),
   ];
   Widget currentScreen = const DashBoard();
-  @override
-  void initState() {
-    super.initState();
-    //getting sharedpreference value of user type and id type
-    getLocalData();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const Navbar(),
+      drawer: Navbar(),
+      // drawer: const Navbar(),
       appBar: AppBar(
         centerTitle: true,
         elevation: 6,
@@ -114,6 +133,30 @@ class _HomeState extends State<ForStudent> {
               backgroundColor: Colors.orangeAccent),
         ],
       ),
+    );
+  }
+
+  Future sendnotification() async {
+    notificationservices.getdevicetoken().then(
+      (value) async {
+        var data = {
+          'to': value.toString(),
+          'priority': 'high',
+          'notification': {
+            'title': 'Gor',
+            'body': 'Darshil',
+          }
+        };
+        await http.post(
+          Uri.parse('https://fcm.googleapis.com/fcm/send'),
+          body: jsonEncode(data),
+          headers: {
+            'Content-Type': 'application/json;charset=UTF-8',
+            'Authorization':
+                'Key=AAAAkFDq8M4:APA91bH_62mL7DqvHbvwKyPNB5GagygGFkWi0ugeuVn6ZJaMTdlgA0FLbPgKuIBmTCqu3wmrT-TgmLip1994v6MkgibGX8-bN06NTJccgOoC3K8dhGZMyYU85WHkI8O2A4TF7vp3QP9X'
+          },
+        );
+      },
     );
   }
 }

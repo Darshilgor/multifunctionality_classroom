@@ -2,7 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_app/main.dart';
-import 'package:my_app/student_result.dart';
+import 'package:my_app/student_corner_features.dart';
+import 'package:my_app/teachercorner.dart';
 import 'package:my_app/utils/Admin/adminpage.dart';
 import 'package:my_app/utils/Drawer/courses/courses.dart';
 import 'package:my_app/utils/Drawer/studentlist/studentlist.dart';
@@ -10,12 +11,11 @@ import 'package:my_app/utils/Drawer/teacherlist/teacherlist.dart';
 import 'package:my_app/utils/constant/constants.dart';
 import 'package:my_app/utils/login/choise.dart';
 
-void main(List<String> args) {
-  runApp(
-    const MyApp(),
-  );
-}
-
+// void main(List<String> args) {
+//   runApp(
+//     const MyApp(),
+//   );
+// }
 class Navbar extends StatefulWidget {
   const Navbar({super.key});
 
@@ -76,7 +76,7 @@ class _NavbarState extends State<Navbar> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => Result(),
+                    builder: (context) => StudetnCornerFeatures(),
                   ),
                 );
               },
@@ -174,6 +174,27 @@ class _NavbarState extends State<Navbar> {
               ),
             ),
           ),
+          Visibility(
+            visible: uType == 'Teacher',
+            child: ListTile(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TeacherCorner(),
+                  ),
+                );
+              },
+              leading: Icon(
+                Icons.admin_panel_settings,
+                size: 29,
+              ),
+              title: Text(
+                "Teacher Corner",
+                style: TextStyle(fontSize: 17),
+              ),
+            ),
+          ),
           ListTile(
             onTap: () {},
             leading: Icon(
@@ -200,7 +221,7 @@ class _NavbarState extends State<Navbar> {
             onTap: () {
               FirebaseAuth.instance.signOut();
               {
-                Navigator.push(context,
+                Navigator.pushReplacement(context,
                     MaterialPageRoute(builder: (context) => const Choise()));
               }
             },

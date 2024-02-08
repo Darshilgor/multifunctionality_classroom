@@ -40,48 +40,28 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
   TextEditingController classnamecontroller = TextEditingController();
 
 //for branch dropdowntextfield
-  // List<String> branchnames = [];
-  // List<DropDownValueModel> branchnamelist = [];
   late SingleValueDropDownController branchname;
 
 //for semester dropdowntextfield
-  // List<String> semesters = [];
-  // List<DropDownValueModel> Semesterlist = [];
   late SingleValueDropDownController semester;
 
-  // TextEditingController startingyear =
-  //     new TextEditingController(); //starting year textformfield controller
-  // TextEditingController endingyear =
-  //     new TextEditingController(); //ending year textformfield controller
-
 //for mentor dropdowntextfield
-  late SingleValueDropDownController mentorname;
-  // List<String> mentorfirstname = [];
-  // List<String> mentormidlename = [];
-  // List<String> mentorlastname = [];
+  SingleValueDropDownController mentorname = SingleValueDropDownController();
 
 //for classname dropdowntextfield
 
   late SingleValueDropDownController classname;
-  // String tempclassname = '';
 
   GetList getlist = GetList();
 
   @override
   void initState() {
     super.initState();
-
-    // getlist.getsemesterlist();
-    // getlist.getmentorlist();
     branchname = SingleValueDropDownController();
-    semester = SingleValueDropDownController();
-    mentorname = SingleValueDropDownController();
+    // mentorname = SingleValueDropDownController();
     classname = SingleValueDropDownController();
-    print("ghfhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh");
-    // getcoursenamelist(); //getting course list
-    // getsemesternamelist(); //getting semester list
-    // getmentorlist(); //getting mentor list
-    // getclassnamelist(); //getting class list
+    mentorname.dropDownValue =
+        DropDownValueModel(name: 'jfds;', value: 'djkld');
   }
 
   Widget build(BuildContext context) {
@@ -115,8 +95,6 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
                 SizedBox(
                   height: 15,
                 ),
-                if (branchname.dropDownValue != null)
-                  Text(branchname.dropDownValue!.name),
                 if (widget.title == 'Update Class' &&
                     branchname.dropDownValue != null)
 
@@ -143,119 +121,6 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
                             ],
                           ),
                         ),
-                      // Visibility(
-                      //   visible: visibility,
-                      //   //dropdowntextformfield for select branch in update class
-                      //   child: Form(
-                      //     key: branchnamekey,
-                      //     child: Column(
-                      //       children: [
-                      //         dropdowntextfield(context, "Select Branch",
-                      //             branchnamelist, branchname, true),
-                      //       ],
-                      //     ),
-                      //   ),
-                      // ),
-                      SizedBox(
-                        height: 15,
-                      ),
-                      // if (widget.title == 'Create Class')
-                      //   //dorpdowntextfromfield for select semester in create class
-                      //   Form(
-                      //     key: semesterkey,
-                      //     child: Column(
-                      //       children: [
-                      //         dropdowntextfield(
-                      //             context, "Select Semester", semester, true),
-                      //       ],
-                      //     ),
-                      //   ),
-                      //dropdowntextformfield for select semester in update class
-                      // Visibility(
-                      //   visible: visibility,
-                      //   child: Form(
-                      //     key: semesterkey,
-                      //     child: Column(
-                      //       children: [
-                      //         dropdowntextfield(context, "Select Semester",
-                      //             Semesterlist, semester, true),
-                      //       ],
-                      //     ),
-                      //   ),
-                      // ),
-                      // SizedBox(
-                      //   height: 15,
-                      // ),
-                      // if (widget.title == 'Create Class')
-                      //   //textformfield for enter staring year in create class
-                      //   Form(
-                      //     key: startingyearkey,
-                      //     child: Column(
-                      //       children: [
-                      //         textformfield(
-                      //             context,
-                      //             startingyear,
-                      //             "Staring Year",
-                      //             "Starting Year",
-                      //             "Please enter the starting year"),
-                      //       ],
-                      //     ),
-                      //   ),
-                      // //textformfield for enter staring year in update class
-                      // Visibility(
-                      //   visible: visibility,
-                      //   child: Form(
-                      //     key: startingyearkey,
-                      //     child: Column(
-                      //       children: [
-                      //         textformfield(
-                      //             context,
-                      //             startingyear,
-                      //             "Staring Year",
-                      //             "Starting Year",
-                      //             "Please enter the starting year"),
-                      //       ],
-                      //     ),
-                      //   ),
-                      // ),
-                      // SizedBox(
-                      //   height: 15,
-                      // ),
-                      // if (widget.title == 'Create Class')
-                      //   //textformfield for enter ending year in create class
-                      //   Form(
-                      //     key: endingyearkey,
-                      //     child: Column(
-                      //       children: [
-                      //         textformfield(
-                      //             context,
-                      //             endingyear,
-                      //             "Ending Year",
-                      //             "Ending Year",
-                      //             "Please enter the ending year"),
-                      //       ],
-                      //     ),
-                      //   ),
-                      // //textformfield for enter ending year in update class
-                      // Visibility(
-                      //   visible: visibility,
-                      //   child: Form(
-                      //     key: endingyearkey,
-                      //     child: Column(
-                      //       children: [
-                      //         textformfield(
-                      //             context,
-                      //             endingyear,
-                      //             "Ending Year",
-                      //             "Ending Year",
-                      //             "Please enter the ending year"),
-                      //       ],
-                      //     ),
-                      //   ),
-                      // ),
-                      SizedBox(
-                        height: 15,
-                      ),
                       if (widget.title == 'Create Class')
                         //dropdowntextformfield for select mentor in crete class
                         Form(
@@ -276,8 +141,6 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
                               context, "Select Mentor", mentorname, true),
                         ),
                       ),
-                      if (mentorname.dropDownValue != null)
-                        Text(mentorname.dropDownValue!.name),
                       SizedBox(
                         height: 25,
                       ),
@@ -300,7 +163,7 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
                                 branchname.dropDownValue!.name,
                                 classname.dropDownValue!.name,
                                 mentorname.dropDownValue!.name)
-                            : Text('Something went wrong'),
+                            : Text('Please select mentor name'),
                       )
                     ],
                   ),
@@ -348,33 +211,6 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
     );
   }
 
-//get courselist method
-  // Future getcoursenamelist() async {
-  //   await FirebaseFirestore.instance.collection("Branch").get().then(
-  //     (QuerySnapshot querysnapshot) {
-  //       querysnapshot.docs.forEach(
-  //         (element) {
-  //           setState(
-  //             () {
-  //               branchnames.add(
-  //                 element["Branch Name"],
-  //               );
-  //             },
-  //           );
-  //         },
-  //       );
-  //       for (int i = 0; i < branchnames.length; i++) {
-  //         setState(() {
-  //           branchnamelist.add(DropDownValueModel(
-  //             name: '${branchnames[i]}',
-  //             value: '${branchnames[i]}',
-  //           ));
-  //         });
-  //       }
-  //     },
-  //   );
-  // }
-
 //create dropdowntextformfield method
   dropdowntextfield(BuildContext context, String labeltext,
       SingleValueDropDownController name, bool controller) {
@@ -387,10 +223,8 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
               : getlist.getmentorlist('Teacher'),
       builder: (context, future) {
         if (future.hasData) {
-          print(future.data);
           list = future.data!;
           return DropDownTextField(
-            // initialValue: (labeltext == 'Select Mentor') ? mentorvalue : '',
             validator: (value) {
               if (name.dropDownValue == null) {
                 return "Please fill the detail";
@@ -401,10 +235,6 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
               }
             },
             onChanged: (value) {
-              setState(() {
-                print(
-                    'Branch Name${branchname.dropDownValue!.name.toString()}');
-              });
               setState(() {});
             },
             isEnabled: controller,
@@ -445,78 +275,6 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
     );
   }
 
-//get semester list method
-  // Future getsemesternamelist() async {
-  //   await FirebaseFirestore.instance.collection("Semester").get().then(
-  //     (QuerySnapshot querysnapshot) {
-  //       querysnapshot.docs.forEach(
-  //         (element) {
-  //           setState(
-  //             () {
-  //               semesters.add(
-  //                 element['Semester'],
-  //               );
-  //             },
-  //           );
-  //         },
-  //       );
-  //       for (int i = 0; i < semesters.length; i++) {
-  //         setState(() {
-  //           Semesterlist.add(
-  //             DropDownValueModel(
-  //               name: '${semesters[i]}',
-  //               value: '${semesters[i]}',
-  //             ),
-  //           );
-  //         });
-  //       }
-  //     },
-  //   );
-  // }
-
-//get mentor list method
-  // Future getmentorlist() async {
-  //   await FirebaseFirestore.instance.collection("Teacher").get().then(
-  //     (QuerySnapshot querysnapshot) {
-  //       querysnapshot.docs.forEach(
-  //         (element) {
-  //           setState(
-  //             () {
-  //               mentorfirstname.add(
-  //                 element['First Name'],
-  //               );
-  //               mentormidlename.add(
-  //                 element['Midle Name'],
-  //               );
-  //               mentorlastname.add(
-  //                 element['Last Name'],
-  //               );
-  //             },
-  //           );
-  //         },
-  //       );
-  //       for (int i = 0; i < mentorfirstname.length; i++) {
-  //         setState(() {
-  //           mentorlist.add(
-  //             DropDownValueModel(
-  //               name: '${mentorfirstname[i]}'
-  //                   ' '
-  //                   '${mentormidlename[i]}'
-  //                   ' '
-  //                   '${mentorlastname[i]}',
-  //               value: '${mentorfirstname[i]}'
-  //                   ' '
-  //                   '${mentormidlename[i]}'
-  //                   ' '
-  //                   '${mentorlastname[i]}',
-  //             ),
-  //           );
-  //         });
-  //       }
-  //     },
-  //   );
-  // }
-
 //button design method
   button(BuildContext context, String labeltext, String branchname,
       String classname, String mentorname) {
@@ -551,9 +309,9 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
   Future clear() async {
     setState(
       () {
-        classnamecontroller.clear();
-        branchname.clearDropDown();
-        semester.clearDropDown();
+        // classnamecontroller.clear();
+        // branchname.clearDropDown();
+        // semester.clearDropDown();
         mentorname.clearDropDown();
       },
     );
@@ -619,9 +377,7 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
               return DropDownTextField(
                 onChanged: (value) async {
                   visibility = true;
-                  setState(() {
-                    print(classname.dropDownValue!.name);
-                  });
+                  setState(() {});
                   if (classname.dropDownValue != null &&
                       branchname.dropDownValue != null) {
                     setState(() {
@@ -632,28 +388,12 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
                       print('Mentor Name Is$mentorvalue');
                     });
                   }
-                  //set controller value for intial value
-                  // branchname.setDropDown(
-                  //   DropDownValueModel(
-                  //     name: branchnamevalue.toString(),
-                  //     value: branchnamevalue.toString(),
-                  //   ),
-                  // );
-                  // semester.setDropDown(
-                  //   DropDownValueModel(
-                  //     name: semestervalue.toString(),
-                  //     value: semestervalue.toString(),
-                  //   ),
-                  // );
                   mentorname.setDropDown(
                     DropDownValueModel(
                       name: mentorvalue.toString(),
                       value: mentorvalue.toString(),
                     ),
                   );
-                  // startingyear.text = startingyearvalue;
-                  // endingyear.text = endingyearvalue;
-
                   setState(() {});
                 },
                 validator: (value) {
@@ -696,39 +436,14 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
                 ),
               );
             }
-            return Text('Class is selected in update method');
+            return Center(
+              child: CircularProgressIndicator(),
+            );
           },
         ),
       ],
     );
   }
-
-//get class list method
-  // Future getclassnamelist() async {
-  //   await FirebaseFirestore.instance.collection(collectionvalue).get().then(
-  //     (QuerySnapshot querysnapshot) {
-  //       querysnapshot.docs.forEach(
-  //         (element) {
-  //           setState(() {
-  //             classnames.add(
-  //               element['Class Name'],
-  //             );
-  //           });
-  //         },
-  //       );
-  //       for (int i = 0; i < classnames.length; i++) {
-  //         setState(() {
-  //           classnamelist.add(
-  //             DropDownValueModel(
-  //               name: classnames[i],
-  //               value: classnames[i],
-  //             ),
-  //           );
-  //         });
-  //       }
-  //     },
-  //   );
-  // }
 
 //method of update class details
   Future updateclassdetails(BuildContext context, String branchname,
@@ -835,8 +550,11 @@ class _CreateUpdateClassState extends State<CreateUpdateClass> {
         .then(
       (DocumentSnapshot snapshot) {
         if (snapshot.exists) {
-          mentorvalue = snapshot['Mentor'];
-          print('mentor name$mentorvalue');
+          // mentorname.dropDownValue = snapshot['Mentor'];
+          // print(mentorname.dropDownValue!.name);
+          // print('mentor name$mentorvalue');
+          mentorname.setDropDown(DropDownValueModel(
+              name: snapshot['Mentor'], value: snapshot['Mentor']));
         }
       },
     );

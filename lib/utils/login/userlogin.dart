@@ -27,8 +27,6 @@ class _UserLogInState extends State<UserLogIn> {
   void initState() {
     super.initState();
     setLocalData(widget.user, widget.idType);
-    print('User Type in UserLogin Page$uType');
-    print('User Type in UserLogin Page$uId');
   }
 
   @override
@@ -113,23 +111,58 @@ class _UserLogInState extends State<UserLogIn> {
               Row(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(left: 45),
+                    padding: EdgeInsets.only(left: 45),
                     //login button
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        fixedSize: const Size(250, 60),
-                        textStyle: const TextStyle(fontSize: 25),
+                        fixedSize: Size(250, 60),
+                        textStyle: TextStyle(fontSize: 25),
                       ),
-                      onPressed: () async {
-                        await signIn(widget.user, idcontroller.text);
+                      onPressed: () {
+                        signIn(widget.user, idcontroller.text);
                       },
-                      child: const Text("LogIn"),
+                      child: Text("LogIn"),
                     ),
                   ),
                   //back button
                   backButton(),
                 ],
-              )
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Center(
+                child: InkWell(
+                    onTap: () async {
+                      try {
+                        if (idcontroller.text.toString().isNotEmpty) {
+                          try {
+                            await FirebaseFirestore.instance
+                                .collection(widget.user)
+                                .doc(idcontroller.text.toString())
+                                .get()
+                                .then((value) {
+                              email = value['Email'];
+                            });
+                            if (email.isNotEmpty) {
+                              print('Send');
+                              // FirebaseAuth.instance
+                              //     .sendPasswordResetEmail(email: email);
+                            } else {
+                              print('please contact admin');
+                            }
+                          } catch (e) {
+                            print('does not exits');
+                          }
+                        } else {
+                          print('Enter the id');
+                        }
+                      } catch (e) {
+                        print(e.toString());
+                      }
+                    },
+                    child: Text('forgate password')),
+              ),
             ],
           ),
         ),
@@ -166,7 +199,7 @@ class _UserLogInState extends State<UserLogIn> {
     );
     try {
       await getEmail(collection, id);
-      print(emailId);
+
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(
         email: emailId,
@@ -177,8 +210,9 @@ class _UserLogInState extends State<UserLogIn> {
         uId = id;
         await setLocalData(collection, id);
         await getloginuserdata(collection, id);
-        Navigator.popUntil(context, (route) => false);
-        Navigator.push(
+        Navigator.pop(context);
+        Navigator.popUntil(context, (route) => route.isFirst);
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => ForStudent(),
@@ -186,6 +220,7 @@ class _UserLogInState extends State<UserLogIn> {
         );
       });
     } on FirebaseAuthException catch (e) {
+      Navigator.pop(context);
       if (e.code == 'user-not-found') {
         wrongemailmessage();
       } else if (e.code == 'wrong-password') {
@@ -194,46 +229,7 @@ class _UserLogInState extends State<UserLogIn> {
         print(e);
       }
     }
-
-    print('User Type in UserLogIn${collection}');
-    print('User Id in UserLogIn$id');
-
-    if (uType.isNotEmpty && uId.isNotEmpty) {
-      print('Is UserType UserType $uType');
-      print('Is UserId UserId $uId');
-    }
-    // FirebaseFirestore.instance
-    //     .collection(uType.toString())
-    //     .doc(uId.toString())
-    //     .get()
-    //     .then((value) {
-    //   firstname = value['First Name'];
-    //   lastname = value['Last Name'];
-    //   profilephoto = value['Profile Photo'];
-    //   if (uType == 'Student') {
-    //     studentsemester = value['Semester'];
-    //   }
-    // setState(() {});
-    // print(spi1);
-    // print(spi2);
-    // print(spi3);
-    // print(spi4);
-    // print(firstname);
-    // print(midlename);
-    // print(lastname);
-    // print(branch);
-    // print(cpi);
-    // print(phone);
-    // print(spilist);
-    // print(enrollmentno);
-    // print(semester);
-    // print("Student Semester IS $studentsemester");
-    // });
-    // FirebaseFirestore.instance.collection('Classes').doc('E').get().then(
-    //   (value) {
-    //     className = value['Class Name'];
-    //   },
-    // );
+    
   }
 
   //Wrong email method
@@ -346,25 +342,7 @@ class _UserLogInState extends State<UserLogIn> {
     } on FirebaseException catch (e) {
       print(e);
     }
-    // try {
-    //   print(collection);
-    //   print(id);
-
-    //   // await FirebaseFirestore.instance
-    //   //     .collection(collection)
-    //   //     .doc(id)
-    //   //     .get()
-    //   //     .then(
-    //   //   (value) {
-    //   //     setState(() {
-    //   //       emailId = value['Email'];
-    //   //     });
-    //   //   },
-    //   // );
-    //   print('Email For LogIn Is In UserLogIn Is $emailId');
-    // } on FirebaseException catch (e) {
-    //   print(e.message);
-    // }
+    
     return emailId;
   }
 }

@@ -77,31 +77,29 @@ class _AdminPageState extends State<AdminPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Padding(
-            padding: EdgeInsets.only(
-              left: 95,
-            ),
-            child: Text('Admin Page'),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Padding(
+          padding: EdgeInsets.only(
+            left: 95,
           ),
+          child: Text('Admin Page'),
         ),
-        //define admin page item using gridview builder
-        body: GridView.builder(
-          itemCount: admintext.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2),
-          itemBuilder: (context, index) {
-            return Container(
-              child: buildbox(
-                admintext[index],
-                adminicon[index],
-                createupdatepagelist[index],
-              ),
-            );
-          },
-        ),
+      ),
+      //define admin page item using gridview builder
+      body: GridView.builder(
+        itemCount: admintext.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2),
+        itemBuilder: (context, index) {
+          return Container(
+            child: buildbox(
+              admintext[index],
+              adminicon[index],
+              createupdatepagelist[index],
+            ),
+          );
+        },
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_textfield/dropdown_textfield.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:my_app/utils/Admin/adminpage.dart';
 import 'package:my_app/utils/constant/getlist.dart';
@@ -91,6 +92,14 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
     semester = SingleValueDropDownController();
     year = SingleValueDropDownController();
     classvalue = SingleValueDropDownController();
+  }
+
+  bool _isDisposed = false;
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
   }
 
   // File? profileimage;
@@ -739,22 +748,22 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
 
 // delete student method
   Future deletestudent(String id) async {
-    await FirebaseFirestore.instance
-        .collection("Student")
-        .doc(id)
-        .delete()
-        .whenComplete(
-      () {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              "Student deleted",
-            ),
-          ),
-        );
-      },
-    );
+    for (int i = 1; i <= 8; i++) {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('Student')
+          .doc(id)
+          .collection(i.toString())
+          .get();
+      for (QueryDocumentSnapshot sn in snapshot.docs) {
+        await FirebaseFirestore.instance
+            .collection('Student')
+            .doc(id)
+            .collection(i.toString())
+            .doc(sn.id)
+            .delete();
+      }
+    }
+    deletedocumentrequest(id);
   }
 
 //update student detail method
@@ -1168,6 +1177,76 @@ class _CreateUpdateStudentState extends State<CreateUpdateStudent> {
           height: 15,
         ),
       ],
+    );
+  }
+
+  Future deletedocumentrequest(String id) async {
+    await FirebaseFirestore.instance.collection('Student').doc(id).get().then(
+      (value) async {
+        await FirebaseFirestore.instance.collection('Teacher').get().then(
+          (QuerySnapshot snapshot) {
+            snapshot.docs.forEach(
+              (element) async {
+                print('Branch is in......${value['Branch']}');
+                if ((element['Department'] == value['Branch']) &&
+                    (element['Class'] == value['Class'])) {
+                  // String id=
+                  QuerySnapshot firstsubcollection = await FirebaseFirestore
+                      .instance
+                      .collection('Teacher')
+                      .doc(element['TID'])
+                      .collection('Admission Latter')
+                      .get();
+                  for (QueryDocumentSnapshot firstquerydocumentsnapshot
+                      in firstsubcollection.docs) {
+                    if (firstquerydocumentsnapshot['Enrollment No'] == id) {
+                      await FirebaseFirestore.instance
+                          .collection('Teacher')
+                          .doc(element['TID'])
+                          .collection('Admission Latter')
+                          .doc(id)
+                          .delete()
+                          .whenComplete(
+                        () async {
+                          await FirebaseFirestore.instance
+                              .collection('Student')
+                              .doc(id)
+                              .delete();
+                        },
+                      );
+                      await FirebaseFirestore.instance
+                          .collection('Teacher')
+                          .doc(element['TID'])
+                          .collection('Bonafite Certificate')
+                          .doc(id)
+                          .delete()
+                          .whenComplete(
+                        () async {
+                          await FirebaseFirestore.instance
+                              .collection('Student')
+                              .doc(id)
+                              .delete()
+                              .whenComplete(
+                            () {
+                              if (mounted) {
+                                Navigator.pop(context);
+                                Fluttertoast.showToast(
+                                  msg: 'Student Deleted...',
+                                  toastLength: Toast.LENGTH_SHORT,
+                                );
+                              }
+                            },
+                          );
+                        },
+                      );
+                    }
+                  }
+                }
+              },
+            );
+          },
+        );
+      },
     );
   }
 }

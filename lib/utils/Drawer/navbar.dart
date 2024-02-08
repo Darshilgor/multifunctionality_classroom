@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:my_app/main.dart';
 import 'package:my_app/student_corner_features.dart';
 import 'package:my_app/teachercorner.dart';
 import 'package:my_app/utils/Admin/adminpage.dart';
@@ -214,6 +213,30 @@ class _NavbarState extends State<Navbar> {
             ),
             title: const Text(
               "Setting",
+              style: TextStyle(fontSize: 17),
+            ),
+          ),
+          ListTile(
+            onTap: () {
+              try {
+                FirebaseAuth.instance
+                    .sendPasswordResetEmail(email: email)
+                    .then((value) => print('reset password'));
+                Navigator.pushReplacement(
+                    context, MaterialPageRoute(builder: (context) => Choise()));
+                FirebaseAuth.instance.signOut();
+                setState(() {});
+              } catch (e) {
+                print(e.toString());
+                setState(() {});
+              }
+            },
+            leading: Icon(
+              Icons.lock_reset_outlined,
+              size: 25,
+            ),
+            title: const Text(
+              "reset password",
               style: TextStyle(fontSize: 17),
             ),
           ),

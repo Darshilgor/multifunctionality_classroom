@@ -18,6 +18,7 @@ String midlename = '';
 String lastname = '';
 late num phone;
 String profilephoto = '';
+List<double> spilist = [];
 
 // List<String> firstsemsubjectlist=[];
 // List<String> secondsemsubjectlist=[];
@@ -69,8 +70,6 @@ Future getLocalData() async {
 }
 
 Future getloginuserdata(uType, uId) async {
-  List<double> spilist = [];
-
   return await FirebaseFirestore.instance.collection(uType).doc(uId).get().then(
     (DocumentSnapshot snapshot) {
       if (snapshot.exists) {
@@ -87,7 +86,7 @@ Future getloginuserdata(uType, uId) async {
         }
         if (uType == 'Student') {
           branch = snapshot['Branch'];
-          cpi = snapshot['CPI'].toDouble();
+          cpi = snapshot['CPI'];
           className = snapshot['Class'];
           enrollmentno = snapshot['Enrollment No'];
           year = snapshot['Year'];

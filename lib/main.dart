@@ -19,7 +19,6 @@ Future main(List<String> args) async {
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  print('initializeApp');
 }
 
 class MyApp extends StatefulWidget {
@@ -33,7 +32,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    print(uType);
   }
 
   @override
@@ -53,7 +51,6 @@ class _MyAppState extends State<MyApp> {
                   );
                 }
                 if (snapshot.hasData) {
-                  print(uType);
                   if (uType.isNotEmpty) {
                     return ForStudent();
                   } else {

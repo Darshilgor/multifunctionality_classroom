@@ -236,6 +236,7 @@ class GetList {
   }
 
   Future<List<DropDownValueModel>> getstudentenrollmentlist() async {
+    print('entered in getlist');
     List<String> studentenrollments = [];
     List<DropDownValueModel> studentenrollmentlist = [];
     await FirebaseFirestore.instance.collection("Student").get().then(
@@ -245,7 +246,7 @@ class GetList {
             studentenrollments.add(
               element['Enrollment No'],
             );
-            print(studentenrollments);
+            print('Student enrollments is${studentenrollments}');
           },
         );
         for (int i = 0; i < studentenrollments.length; i++) {
@@ -258,6 +259,7 @@ class GetList {
         }
       },
     );
+    print('Student Enrollment List is in getlist is${studentenrollmentlist}');
     return studentenrollmentlist;
   }
 
@@ -289,7 +291,7 @@ class GetList {
         }
       },
     );
-    print(dropdownvaluemodellist);
+    print('dropdownvaluemodel of student enrollment list${dropdownvaluemodellist}');
     return dropdownvaluemodellist;
   }
 
@@ -338,60 +340,29 @@ class GetList {
     List<String> semesterListForResult = [];
     List<String> semesterlistwithrange = [];
     List<DropDownValueModel> dropdownsemesterlist = [];
-    await FirebaseFirestore.instance.collection('Semester').get().then(
-      (QuerySnapshot snapshot) {
+    if (semester != null) {
+      print(semester);
+      await FirebaseFirestore.instance
+          .collection('Semester')
+          .get()
+          .then((QuerySnapshot snapshot) {
         snapshot.docs.forEach(
           (element) {
-            semesterListForResult.add(element["Semester No"].toString());
+            semesterListForResult.add(element['Semester No']);
           },
         );
-      },
-    );
-    semesterlistwithrange =
-        semesterListForResult.getRange(0, semester).toList();
-    print('Semester List With Range in GetList Is ${semesterlistwithrange}');
+      });
+      for (int i = 0; i < semester - 1; i++) {
+        semesterlistwithrange.add(semesterListForResult[i]);
+      }
+      print('Semester list with range is in getlist is $semesterlistwithrange');
 
-    for (int i = 0; i < semesterlistwithrange.length; i++) {
-      dropdownsemesterlist.add(
-        DropDownValueModel(
-          name: semesterlistwithrange[i],
-          value: semesterlistwithrange[i],
-        ),
-      );
+      for (int i = 0; i < semesterlistwithrange.length; i++) {
+        dropdownsemesterlist.add(DropDownValueModel(
+            name: semesterlistwithrange[i], value: semesterlistwithrange[i]));
+      }
     }
-// List<dropdownva> dropdownValueModels = semesterListForResult.map((e) => DropdownValueModel(e)).toList();
-    // List semesterlistforresult = [];
-    // List dropdownsemesterlistforresult = [];
-    // await FirebaseFirestore.instance.collection('Semester').get().then(
-    //   (QuerySnapshot snapshot) {
-    //     snapshot.docs.forEach(
-    //       (element) {
-    //         semesterlistforresult.add(
-    //           element['Semester No'],
-    //         );
-    //       },
-    //     );
-    // semesterlistforresult.getRange(1, semester);
-    // semesterlistforresult.addAll(
-    //   await FirebaseFirestore.instance.collection('Semester').get().then(
-    //     (QuerySnapshot snapshot) {
-    //       return snapshot.docs
-    //           .map((doc) => doc.data())
-    //           .toList()
-    //           .getRange(1, min(semester, snapshot.docs.length))
-    //           .toList();
-    //     },
-    //   ),
-    // );
-    // print('Semester List for Specific Student$semesterlistforresult');
-    // for (int i = 0; i < semesterlistforresult.length; i++) {
-    //   dropdownsemesterlistforresult.add(
-    //     DropDownValueModel(
-    //       name: '',
-    //       value: semesterlistforresult[i],
-    //     ),
-    //   );
-    // }
+    print('Dropdown semester list is in $dropdownsemesterlist');
     return dropdownsemesterlist;
   }
 

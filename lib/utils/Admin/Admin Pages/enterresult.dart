@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_textfield/dropdown_textfield.dart';
 import 'package:flutter/material.dart';
+import 'package:my_app/utils/constant/constants.dart';
 import 'package:my_app/utils/constant/getlist.dart';
 
 class EnterResult extends StatefulWidget {
@@ -12,6 +15,7 @@ class EnterResult extends StatefulWidget {
 }
 
 class _EnterResultState extends State<EnterResult> {
+  int latestsemester = 0;
   bool visible = false;
   GetList getlist = GetList();
   late SingleValueDropDownController enrollment;
@@ -50,6 +54,8 @@ class _EnterResultState extends State<EnterResult> {
             if (department.dropDownValue != null)
               getspecificbranchstudentlist(context, 'Select Student Enrollment',
                   enrollment, department, visible),
+            // (spilist.length == 3)
+            //     ? Text('Result is already entered...')
             buildlistviewbuilder(department, enrollment, subjectlist, marklist),
             Padding(
               padding: const EdgeInsets.only(
@@ -103,16 +109,17 @@ class _EnterResultState extends State<EnterResult> {
   }
 
   dropdownenrollmentlist(
-      BuildContext context,
-      String labeltext,
-      List<DropDownValueModel> dropdownlist,
-      SingleValueDropDownController controller,
-      bool bool) {
+    BuildContext context,
+    String labeltext,
+    List<DropDownValueModel> dropdownlist,
+    SingleValueDropDownController controller,
+    bool visible,
+  ) {
     String studentid = '';
     return Column(
       children: [
         DropDownTextField(
-          isEnabled: bool,
+          isEnabled: visible,
           dropDownList: dropdownlist,
           validator: (value) {
             if (enrollment.dropDownValue == null) {
@@ -126,6 +133,7 @@ class _EnterResultState extends State<EnterResult> {
           onChanged: (value) async {
             // getstudentdetails(enrollment),
             if (enrollment.dropDownValue != null) {
+              // getstudentdetails(enrollment.dropDownValue!.name.toString());
               await FirebaseFirestore.instance
                   .collection('Student')
                   .doc(enrollment.dropDownValue!.name.toString())
@@ -290,11 +298,13 @@ class _EnterResultState extends State<EnterResult> {
             print('djlaf;jdskf;ljadsklfjda$list');
             // dropdownenrollmentlist(context, "Select student enrollment", list,
             //     enrollment, visible);
+           return  dropdownenrollmentlist(context, "Select student enrollment", list,
+                enrollment, visible);
+          } else {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
           }
-          return (list.isNotEmpty)
-              ? dropdownenrollmentlist(context, "Select student enrollment",
-                  list, enrollment, visible)
-              : Text("No Data Available");
         },
       ),
     );
@@ -351,7 +361,23 @@ class _EnterResultState extends State<EnterResult> {
     );
   }
 
-  // buildlistview() {
-  //   getlist.
+  // Future getstudentdetails(String enrollment) async {
+  //   await FirebaseFirestore.instance
+  //       .collection('Student')
+  //       .doc(enrollment)
+  //       .get()
+  //       .then(
+  //     (DocumentSnapshot snapshot) {
+  //       if (snapshot.exists) {
+  //         for (int i = 1; i <= 8; i++) {
+  //           if (snapshot['SPI$i'] == null) {
+  //             latestsemester = i - 1;
+  //             break;
+  //           }
+  //         }
+  //       }
+  //     },
+  //   );
+  //   return latestsemester;
   // }
 }

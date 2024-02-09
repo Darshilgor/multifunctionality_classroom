@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:date_time_format/date_time_format.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -39,7 +41,8 @@ class _ProfileState extends State<Profile> {
   @override
   void initState() {
     super.initState();
-    //getting login user data
+    getLocalData();
+    print('$uType $uId'); //getting login user data
     userData();
   }
 
@@ -221,6 +224,10 @@ class _ProfileState extends State<Profile> {
             },
           );
           setState(() {});
+          print(enrollment);
+          print(semester);
+          print(course);
+          print('User data loaded....');
         }
       },
     );

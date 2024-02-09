@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:my_app/Home/forstudent.dart';
 import 'package:my_app/utils/constant/constants.dart';
 
@@ -22,12 +25,6 @@ class _UserLogInState extends State<UserLogIn> {
       TextEditingController(); //user password controller
 
   var emailId = '';
-  var password = '';
-  @override
-  void initState() {
-    super.initState();
-    setLocalData(widget.user, widget.idType);
-  }
 
   @override
   void dispose() {
@@ -118,8 +115,9 @@ class _UserLogInState extends State<UserLogIn> {
                         fixedSize: Size(250, 60),
                         textStyle: TextStyle(fontSize: 25),
                       ),
-                      onPressed: () {
-                        signIn(widget.user, idcontroller.text);
+                      onPressed: () async {
+                        // signIn(widget.user, idcontroller.text);
+                        await getEmail(widget.user, widget.idType);
                       },
                       child: Text("LogIn"),
                     ),
@@ -145,20 +143,27 @@ class _UserLogInState extends State<UserLogIn> {
                               email = value['Email'];
                             });
                             if (email.isNotEmpty) {
-                              print('Send');
-                              // FirebaseAuth.instance
-                              //     .sendPasswordResetEmail(email: email);
+                              FirebaseAuth.instance
+                                  .sendPasswordResetEmail(email: email);
+                              Fluttertoast.showToast(msg: 'Mail was sended');
                             } else {
-                              print('please contact admin');
+                              Fluttertoast.showToast(
+                                  msg: 'please contact admin');
+                              setState(() {});
                             }
                           } catch (e) {
-                            print('does not exits');
+                            Fluttertoast.showToast(
+                                msg:
+                                    '${idcontroller.text.toString()} does not exits please check the Id');
+                            setState(() {});
                           }
                         } else {
-                          print('Enter the id');
+                          Fluttertoast.showToast(msg: 'Enter the id');
+                          setState(() {});
                         }
                       } catch (e) {
-                        print(e.toString());
+                        Fluttertoast.showToast(msg: 'Please enter user id....');
+                        setState(() {});
                       }
                     },
                     child: Text('forgate password')),
@@ -185,51 +190,6 @@ class _UserLogInState extends State<UserLogIn> {
         ),
       ),
     );
-  }
-
-  //Login process method
-  Future signIn(String collection, String id) async {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-      },
-    );
-    try {
-      await getEmail(collection, id);
-
-      await FirebaseAuth.instance
-          .signInWithEmailAndPassword(
-        email: emailId,
-        password: passwordcontroller.text.toString(),
-      )
-          .then((value) async {
-        uType = collection;
-        uId = id;
-        await setLocalData(collection, id);
-        await getloginuserdata(collection, id);
-        Navigator.pop(context);
-        Navigator.popUntil(context, (route) => route.isFirst);
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ForStudent(),
-          ),
-        );
-      });
-    } on FirebaseAuthException catch (e) {
-      Navigator.pop(context);
-      if (e.code == 'user-not-found') {
-        wrongemailmessage();
-      } else if (e.code == 'wrong-password') {
-        wrondpassword();
-      } else {
-        print(e);
-      }
-    }
-    
   }
 
   //Wrong email method
@@ -273,76 +233,357 @@ class _UserLogInState extends State<UserLogIn> {
   }
 
   //getting use email method
-  Future getEmail(String collection, String id) async {
+  getEmail(String collection, String id) async {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
     try {
-      await FirebaseFirestore.instance.collection(collection).get().then(
-        (QuerySnapshot snapshot) {
-          snapshot.docs.forEach(
-            (element) async {
-              if (collection == 'Student') {
-                if (id == element['Enrollment No']) {
-                  await FirebaseFirestore.instance
-                      .collection(collection)
-                      .doc(id)
-                      .get()
-                      .then(
-                    (value) {
-                      setState(
-                        () {
-                          emailId = value['Email'];
-                        },
-                      );
-                    },
-                  );
-                } else {
-                  wrongemailmessage();
-                }
-              } else if (collection == 'Teacher') {
-                if (id == element['TID']) {
-                  await FirebaseFirestore.instance
-                      .collection(collection)
-                      .doc(id)
-                      .get()
-                      .then(
-                    (value) {
-                      setState(
-                        () {
-                          emailId = value['Email'];
-                        },
-                      );
-                    },
-                  );
-                } else {
-                  wrongemailmessage();
-                }
-              } else if (collection == 'Admin') {
-                if (id == element['AID']) {
-                  await FirebaseFirestore.instance
-                      .collection(collection)
-                      .doc(id)
-                      .get()
-                      .then(
-                    (value) {
-                      setState(
-                        () {
-                          emailId = value['Email'];
-                        },
-                      );
-                    },
-                  );
-                } else {
-                  wrongemailmessage();
-                }
+      QuerySnapshot snapshot =
+          await FirebaseFirestore.instance.collection(collection).get();
+
+      if (collection == 'Student') {
+        for (int i = 0; i < snapshot.docs.length; i++) {
+          try {
+            if (idcontroller.text.toString().isNotEmpty) {
+              DocumentSnapshot snapshot = await FirebaseFirestore.instance
+                  .collection(collection)
+                  .doc(idcontroller.text.toString())
+                  .get();
+
+              if (snapshot.exists) {
+                await FirebaseFirestore.instance
+                    .collection(collection)
+                    .doc(idcontroller.text.toString())
+                    .get()
+                    .then(
+                  (value) {
+                    emailId = value['Email'];
+                  },
+                ).whenComplete(
+                  () {
+                    if (emailId.isNotEmpty) {
+                      if (passwordcontroller.text.toString().isNotEmpty) {
+                        try {
+                          FirebaseAuth.instance
+                              .signInWithEmailAndPassword(
+                            email: emailId,
+                            password: passwordcontroller.text.toString(),
+                          )
+                              .then(
+                            (value) async {
+                              await setLocalData(
+                                  collection, idcontroller.text.toString());
+                              await getloginuserdata(
+                                  collection, idcontroller.text.toString());
+                              if (mounted) {
+                                Navigator.popUntil(
+                                    context, (route) => route.isFirst);
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ForStudent(),
+                                  ),
+                                );
+                              }
+                            },
+                          ).catchError(
+                            (error) {
+                              if (error is FirebaseAuthException) {
+                                if (error.code == 'too-many-requests') {
+                                  Fluttertoast.showToast(
+                                    msg:
+                                        'Too many login attempts. Please try again later.',
+                                  );
+                                } else if (error.code == 'wrong-password') {
+                                  wrongpassword();
+                                } else {
+                                  Fluttertoast.showToast(
+                                      msg: error.message.toString());
+                                }
+                              } else {
+                                Fluttertoast.showToast(
+                                    msg: error.message.toString());
+                              }
+                            },
+                          );
+                        } on FirebaseAuthException catch (e) {
+                          if (e.code == 'user-not-found') {
+                            wrongemailmessage();
+                          } else if (e.code == 'wrong-password') {
+                            wrongpassword();
+                          } else {
+                            Fluttertoast.showToast(
+                                msg:
+                                    'Something went wrong try after some time....');
+                          }
+                        }
+                      } else {
+                        Fluttertoast.showToast(
+                            msg: 'Please enter password....');
+                      }
+                    } else {
+                      Fluttertoast.showToast(msg: 'Email is does not exits...');
+                    }
+                  },
+                );
+              } else {
+                Fluttertoast.showToast(
+                    msg: 'Please check UserID or UserID does not exits...');
               }
-              setState(() {});
-            },
-          );
-        },
-      );
+            } else {
+              Fluttertoast.showToast(msg: 'Please enter the UserId');
+            }
+          } on FirebaseAuthException catch (e) {
+            if (e.code == 'user-not-fount') {
+              wrongemailmessage();
+            } else if (e.code == 'wrong-password') {
+              wrondpassword();
+            } else if (e.code ==
+                'cannot get field "Email" on a DocumentSnapshotPlatform which does not exist') {
+            } else {
+              Fluttertoast.showToast(msg: '${e.toString()}');
+            }
+          }
+        }
+
+        if (emailId.isEmpty) {
+          Fluttertoast.showToast(msg: 'Email id is empty please contact admin');
+        }
+      }
+
+      if (collection == 'Teacher') {
+        for (int i = 0; i < snapshot.docs.length; i++) {
+          try {
+            if (idcontroller.text.toString().isNotEmpty) {
+              DocumentSnapshot snapshot = await FirebaseFirestore.instance
+                  .collection(collection)
+                  .doc(idcontroller.text.toString())
+                  .get();
+
+              if (snapshot.exists) {
+                await FirebaseFirestore.instance
+                    .collection(collection)
+                    .doc(idcontroller.text.toString())
+                    .get()
+                    .then(
+                  (value) {
+                    emailId = value['Email'];
+                  },
+                ).whenComplete(
+                  () {
+                    if (emailId.isNotEmpty) {
+                      if (passwordcontroller.text.toString().isNotEmpty) {
+                        try {
+                          FirebaseAuth.instance
+                              .signInWithEmailAndPassword(
+                            email: emailId,
+                            password: passwordcontroller.text.toString(),
+                          )
+                              .then(
+                            (value) async {
+                              uType = collection;
+                              uId = id;
+                              await setLocalData(
+                                  collection, idcontroller.text.toString());
+                              await getloginuserdata(collection, id);
+                              if (mounted) {
+                                Navigator.popUntil(
+                                    context, (route) => route.isFirst);
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ForStudent(),
+                                  ),
+                                );
+                              }
+                            },
+                          ).catchError(
+                            (error) {
+                              if (error is FirebaseAuthException) {
+                                if (error.code == 'too-many-requests') {
+                                  Fluttertoast.showToast(
+                                    msg:
+                                        'Too many login attempts. Please try again later.',
+                                  );
+                                } else if (error.code == 'wrong-password') {
+                                  wrongpassword();
+                                } else {
+                                  Fluttertoast.showToast(
+                                      msg: error.message.toString());
+                                }
+                              } else {
+                                Fluttertoast.showToast(msg: error.toString());
+                              }
+                            },
+                          );
+                        } on FirebaseAuthException catch (e) {
+                          if (e.code == 'user-not-found') {
+                            wrongemailmessage();
+                          } else if (e.code == 'wrong-password') {
+                            wrongpassword();
+                          } else {
+                            Fluttertoast.showToast(msg: e.toString());
+                          }
+                        }
+                      } else {
+                        Fluttertoast.showToast(
+                            msg: 'Please enter password....');
+                      }
+                    } else {
+                      Fluttertoast.showToast(msg: 'Email is does not exits...');
+                    }
+                  },
+                );
+              } else {
+                Fluttertoast.showToast(
+                    msg: 'Please check UserID or UserID does not exits...');
+              }
+            } else {
+              Fluttertoast.showToast(msg: 'Please enter the UserId');
+            }
+          } on FirebaseAuthException catch (e) {
+            if (e.code == 'user-not-fount') {
+              wrongemailmessage();
+            } else if (e.code == 'wrong-password') {
+              wrondpassword();
+            } else if (e.code ==
+                'cannot get field "Email" on a DocumentSnapshotPlatform which does not exist') {
+              Fluttertoast.showToast(
+                  msg: 'Email is not exits please contact admin');
+            } else {
+              Fluttertoast.showToast(msg: e.toString());
+            }
+          }
+        }
+
+        if (emailId.isEmpty) {
+          Fluttertoast.showToast(
+              msg: 'Email id is not exits please contact admin');
+        }
+      }
+      if (collection == 'Admin') {
+        for (int i = 0; i < snapshot.docs.length; i++) {
+          try {
+            if (idcontroller.text.toString().isNotEmpty) {
+              DocumentSnapshot snapshot = await FirebaseFirestore.instance
+                  .collection(collection)
+                  .doc(idcontroller.text.toString())
+                  .get();
+
+              if (snapshot.exists) {
+                await FirebaseFirestore.instance
+                    .collection(collection)
+                    .doc(idcontroller.text.toString())
+                    .get()
+                    .then(
+                  (value) {
+                    emailId = value['Email'];
+                  },
+                ).whenComplete(
+                  () {
+                    if (emailId.isNotEmpty) {
+                      if (passwordcontroller.text.toString().isNotEmpty) {
+                        try {
+                          FirebaseAuth.instance
+                              .signInWithEmailAndPassword(
+                            email: emailId,
+                            password: passwordcontroller.text.toString(),
+                          )
+                              .then(
+                            (value) async {
+                              uType = collection;
+                              uId = id;
+                              await setLocalData(
+                                  collection, idcontroller.text.toString());
+                              await getloginuserdata(collection, id);
+                              if (mounted) {
+                                Navigator.popUntil(
+                                    context, (route) => route.isFirst);
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ForStudent(),
+                                  ),
+                                );
+                              }
+                            },
+                          ).catchError(
+                            (error) {
+                              if (error is FirebaseAuthException) {
+                                if (error.code == 'too-many-requests') {
+                                  Fluttertoast.showToast(
+                                    msg:
+                                        'Too many login attempts. Please try again later.',
+                                  );
+                                } else if (error.code == 'wrong-password') {
+                                  wrongpassword();
+                                } else {
+                                  Fluttertoast.showToast(
+                                      msg: error.message.toString());
+                                }
+                              } else {
+                                Fluttertoast.showToast(msg: error.toString());
+                              }
+                            },
+                          );
+                        } on FirebaseAuthException catch (e) {
+                          if (e.code == 'user-not-found') {
+                            wrongemailmessage();
+                          } else if (e.code == 'wrong-password') {
+                            wrongpassword();
+                          } else {
+                            Fluttertoast.showToast(msg: e.toString());
+                          }
+                        }
+                      } else {
+                        Fluttertoast.showToast(
+                            msg: 'Please enter password....');
+                      }
+                    } else {
+                      Fluttertoast.showToast(msg: 'Email is does not exits...');
+                    }
+                  },
+                );
+              } else {
+                Fluttertoast.showToast(
+                    msg: 'Please check UserID or UserID does not exits...');
+              }
+            } else {
+              Fluttertoast.showToast(msg: 'Please enter the UserId');
+            }
+          } on FirebaseAuthException catch (e) {
+            if (e.code == 'user-not-fount') {
+              wrongemailmessage();
+            } else if (e.code == 'wrong-password') {
+              wrondpassword();
+            } else if (e.code ==
+                'cannot get field "Email" on a DocumentSnapshotPlatform which does not exist') {
+              Fluttertoast.showToast(
+                  msg: 'Email id is not exits please contact admin');
+            } else {
+              Fluttertoast.showToast(msg: e.toString());
+            }
+          }
+        }
+
+        if (emailId.isEmpty) {
+          Fluttertoast.showToast(
+              msg: 'Email id is not exits please contact admin');
+        }
+      }
     } on FirebaseException catch (e) {
-      print(e);
+      Fluttertoast.showToast(msg: e.toString());
+    } finally {
+      Navigator.pop(context); // Close the dialog
     }
-    
-    return emailId;
+  }
+
+  void wrongpassword() {
+    Fluttertoast.showToast(msg: 'Wrong password...');
   }
 }

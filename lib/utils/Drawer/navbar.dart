@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:my_app/student_corner_features.dart';
 import 'package:my_app/teachercorner.dart';
 import 'package:my_app/utils/Admin/adminpage.dart';
@@ -36,6 +37,8 @@ class _NavbarState extends State<Navbar> {
     super.initState();
     getLocalData();
     userData();
+    getloginuserdata(uType, uId);
+    setState(() {});
   }
 
   @override
@@ -219,15 +222,15 @@ class _NavbarState extends State<Navbar> {
           ListTile(
             onTap: () {
               try {
-                FirebaseAuth.instance
-                    .sendPasswordResetEmail(email: email)
-                    .then((value) => print('reset password'));
+                FirebaseAuth.instance.sendPasswordResetEmail(email: email).then(
+                    (value) => Fluttertoast.showToast(
+                        msg: 'Mail was send for resent password'));
                 Navigator.pushReplacement(
                     context, MaterialPageRoute(builder: (context) => Choise()));
                 FirebaseAuth.instance.signOut();
                 setState(() {});
               } catch (e) {
-                print(e.toString());
+                Fluttertoast.showToast(msg: e.toString());
                 setState(() {});
               }
             },

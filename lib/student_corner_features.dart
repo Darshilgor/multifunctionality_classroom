@@ -105,41 +105,5 @@ class _StudetnCornerFeaturesState extends State<StudetnCornerFeatures> {
         ),
       ),
     );
-    // return Padding(
-    //   padding: const EdgeInsets.all(15),
-    //   child: InkWell(
-    //     onTap: () {
-    //       Navigator.push(
-    //         context,
-    //         MaterialPageRoute(
-    //           builder: (context) => gotopagelist,
-    //         ),
-    //       );
-    //     },
-    //     child: Container(
-    //       padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
-    //       decoration: BoxDecoration(
-    //         borderRadius: BorderRadius.circular(15),
-    //         border: Border.all(
-    //             width: 1, color: Colors.black, style: BorderStyle.solid),
-    //       ),
-    //       child: Column(
-    //         children: [
-    //           const SizedBox(
-    //             height: 45,
-    //           ),
-    //           iconlist,
-    //           const SizedBox(
-    //             height: 30,
-    //           ),
-    //           Text(
-    //             textlist,
-    //             style: const TextStyle(fontSize: 20),
-    //           ),
-    //         ],
-    //       ),
-    //     ),
-    //   ),
-    // );
   }
 }

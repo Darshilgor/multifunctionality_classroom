@@ -35,6 +35,7 @@ class _Check_ResultState extends State<Check_Result> {
   @override
   void initState() {
     super.initState();
+    getloginuserdata(uType, uId);
     semestercontroller = SingleValueDropDownController();
     controller = new TextEditingController(text: cpi.toString());
   }

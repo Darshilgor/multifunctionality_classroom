@@ -26,7 +26,7 @@ class _HomeState extends State<ForStudent> {
   @override
   void initState() {
     super.initState();
-    
+
     notificationservices.requestnotificationpermission();
     notificationservices.firebaseinit();
     notificationservices.ontokenrefresh();

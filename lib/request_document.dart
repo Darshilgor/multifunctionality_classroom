@@ -194,80 +194,158 @@ class _Request_DocumentState extends State<Request_Document> {
     );
     if (requestedDocuments.contains('Bonafite Certificate')) {
       bool exitsbonafite = false;
-      print('true');
-      await FirebaseFirestore.instance
+      QuerySnapshot bonafitesnapshot = await FirebaseFirestore.instance
           .collection('Teacher')
           .doc(teacherid)
           .collection('Bonafite Certificate')
-          .get()
-          .then((QuerySnapshot snapshot) {
-        print('true');
-        snapshot.docs.forEach((element) async {
-          for (int i = 0; i < snapshot.docs.length; i++) {
-            if (uId == element['Enrollment No']) {
-              exitsbonafite = !exitsbonafite;
-              Fluttertoast.showToast(msg: 'Already send bonifite request');
-              break;
-            }
-          }
-          if (exitsbonafite == false) {
-            await FirebaseFirestore.instance
-                .collection('Teacher')
-                .doc(teacherid)
-                .collection('Bonafite Certificate')
-                .doc(uId)
-                .set({
-              'First Name': studentfirstname,
-              'Last Name': studentlastname,
-              'Enrollment No': uId,
-              'Branch': branchname,
-              'Class': classname,
-              'Status': 'pending',
-            });
+          .get();
+
+      if (bonafitesnapshot.docs.isEmpty) {
+        print('Enterd to create');
+        await FirebaseFirestore.instance
+            .collection('Teacher')
+            .doc(teacherid)
+            .collection('Bonafite Certificate')
+            .doc(uId)
+            .set({
+          'First Name': studentfirstname,
+          'Last Name': studentlastname,
+          'Enrollment No': uId,
+          'Branch': branchname,
+          'Class': classname,
+          'Status': 'pending',
+        }).whenComplete(
+          () async {
             Fluttertoast.showToast(
                 msg: 'Bonafite certificate request send successfully');
-          }
-        });
-      });
+          },
+        );
+      }
+      if (bonafitesnapshot.docs.isNotEmpty) {
+        await FirebaseFirestore.instance
+            .collection('Teacher')
+            .doc(teacherid)
+            .collection('Bonafite Certificate')
+            .get()
+            .then(
+          (QuerySnapshot bonafitesnapshot) {
+            print('true');
+            bonafitesnapshot.docs.forEach(
+              (element) async {
+                for (int i = 0; i < bonafitesnapshot.docs.length; i++) {
+                  if (uId == element['Enrollment No']) {
+                    exitsbonafite = !exitsbonafite;
+                    Fluttertoast.showToast(
+                        msg: 'Already send bonifite request');
+                    break;
+                  }
+                }
+                if (exitsbonafite == false) {
+                  try {} catch (e) {
+                    print(e.toString());
+                  }
+                }
+              },
+            );
+          },
+        );
+
+        //   await FirebaseFirestore.instance
+        //       .collection('Teacher')
+        //       .doc(teacherid)
+        //       .collection('Bonafite Certificate')
+        //       .doc(uId)
+        //       .set(
+        //     {
+        //       'First Name': studentfirstname,
+        //       'Last Name': studentlastname,
+        //       'Enrollment No': uId,
+        //       'Branch': branchname,
+        //       'Class': classname,
+        //       'Status': 'pending',
+        //     },
+        //   );
+        //   Fluttertoast.showToast(
+        //       msg: 'Bonafite certificate request send successfully');
+        // }
+      }
     }
-    if (requestedDocuments.contains("Admission Latter")) {
-      bool exitadmission = false;
-      await FirebaseFirestore.instance
+    if (requestedDocuments.contains('Admission Latter')) {
+      bool exitsbonafite = false;
+      QuerySnapshot admissionsnapshot = await FirebaseFirestore.instance
           .collection('Teacher')
           .doc(teacherid)
           .collection('Admission Latter')
-          .get()
-          .then(
-        (QuerySnapshot snapshot) {
-          snapshot.docs.forEach((element) async {
-            for (int i = 0; i < snapshot.docs.length; i++) {
-              if (uId == element['Enrollment No']) {
-                exitadmission = !exitadmission;
-                Fluttertoast.showToast(
-                    msg: 'Already send admission latter request');
-                break;
-              }
-            }
-            if (exitadmission == false) {
-              await FirebaseFirestore.instance
-                  .collection('Teacher')
-                  .doc(teacherid)
-                  .collection('Admission Latter')
-                  .doc(uId)
-                  .set({
-                'First Name': studentfirstname,
-                'Last Name': studentlastname,
-                'Enrollment No': uId,
-                'Branch': branchname,
-                'Class': classname,
-                'Status': 'pending',
-              });
-              Fluttertoast.showToast(
-                  msg: 'Admission Latter Request send successfully');
-            }
-          });
-        },
-      );
+          .get();
+
+      if (admissionsnapshot.docs.isEmpty) {
+        print('Enterd to create');
+        await FirebaseFirestore.instance
+            .collection('Teacher')
+            .doc(teacherid)
+            .collection('Admission Latter')
+            .doc(uId)
+            .set({
+          'First Name': studentfirstname,
+          'Last Name': studentlastname,
+          'Enrollment No': uId,
+          'Branch': branchname,
+          'Class': classname,
+          'Status': 'pending',
+        }).whenComplete(
+          () async {
+            Fluttertoast.showToast(
+                msg: 'Admission Latter request send successfully');
+          },
+        );
+      }
+      if (admissionsnapshot.docs.isNotEmpty) {
+        await FirebaseFirestore.instance
+            .collection('Teacher')
+            .doc(teacherid)
+            .collection('Admission Latter')
+            .get()
+            .then(
+          (QuerySnapshot admissionsnapshot) {
+            print('true');
+            admissionsnapshot.docs.forEach(
+              (element) async {
+                for (int i = 0; i < admissionsnapshot.docs.length; i++) {
+                  if (uId == element['Enrollment No']) {
+                    exitsbonafite = !exitsbonafite;
+                    Fluttertoast.showToast(
+                        msg: 'Already send Admission Latter');
+                    break;
+                  }
+                }
+                if (exitsbonafite == false) {
+                  try {} catch (e) {
+                    print(e.toString());
+                  }
+                }
+              },
+            );
+          },
+        );
+
+        // await FirebaseFirestore.instance
+        //     .collection('Teacher')
+        //     .doc(teacherid)
+        //     .collection('Admission Latter')
+        //     .doc(uId)
+        //     .set(
+        //   {
+        //     'First Name': studentfirstname,
+        //     'Last Name': studentlastname,
+        //     'Enrollment No': uId,
+        //     'Branch': branchname,
+        //     'Class': classname,
+        //     'Status': 'pending',
+        //   },
+        // );
+        // Fluttertoast.showToast(
+        //     msg: 'Admission Latter request send successfully');
+      }
     }
   }
 }

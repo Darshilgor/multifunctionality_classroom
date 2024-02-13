@@ -17,21 +17,10 @@ class _Check_ResultState extends State<Check_Result> {
   bool isnull = true;
   late TextEditingController controller;
   final semesterkey = GlobalKey<FormState>();
-  List<String> semesters = [];
   List<DropDownValueModel> semesterlist = [];
   late SingleValueDropDownController semestercontroller;
-  List<String> Subject = [];
-  List<double> listofspi = [];
-  List<String> sem = [];
-  List<double> sumlist = [];
-  List<String> Subjectlength = [];
-  List<String> SPIlist = [];
   double sum = 0;
   double average = 0;
-  double total = 0;
-  double sumofspi = 0;
-  int ssemester = 0;
-  GetList getlist = GetList();
   @override
   void initState() {
     super.initState();
@@ -57,8 +46,7 @@ class _Check_ResultState extends State<Check_Result> {
             createstudentdropdown(context, "Select Semester", semesterlist,
                 semestercontroller, true, "Select Select", semesterkey),
             if (isnull == false && semestercontroller.dropDownValue != null)
-              getresultdetails(
-                  semestercontroller.dropDownValue!.name.toString()),
+              showresultdata(semestercontroller),
             SizedBox(
               height: 20,
             ),
@@ -112,7 +100,6 @@ class _Check_ResultState extends State<Check_Result> {
                   ],
                 ),
 
-            // showcpi(),
           ],
         ),
       ),
@@ -176,8 +163,6 @@ class _Check_ResultState extends State<Check_Result> {
                         },
                       );
                       print('Marks list is in checkresult is ${marks}');
-                      // getsumofmarks(
-                      //     semestercontroller.dropDownValue!.name.toString());
                     }
                   },
                   isEnabled: bool,
@@ -222,7 +207,9 @@ class _Check_ResultState extends State<Check_Result> {
                   ),
                 );
               }
-              return Text("data");
+              return Center(
+                child: CircularProgressIndicator(),
+              );
             },
           ),
         ),
@@ -230,66 +217,6 @@ class _Check_ResultState extends State<Check_Result> {
           height: 15,
         ),
       ],
-    );
-  }
-
-  StreamBuilder getresultdetails(String semester) {
-    return StreamBuilder(
-      stream: FirebaseFirestore.instance
-          .collection(uType)
-          .doc(uId)
-          .collection(semester)
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-        return Column(
-          children: snapshot.data!.docs.map<Widget>(
-            (snap) {
-              return Padding(
-                padding: const EdgeInsets.only(
-                  left: 8,
-                  right: 8,
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          snap['Subject'],
-                          style: TextStyle(
-                            fontSize: 20,
-                          ),
-                        ),
-                        Text(
-                          snap['Marks'].toString(),
-                          style: TextStyle(
-                            fontSize: 20,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    Divider(
-                      thickness: 2,
-                      height: 1,
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                  ],
-                ),
-              );
-            },
-          ).toList(),
-        );
-      },
     );
   }
 
@@ -331,38 +258,50 @@ class _Check_ResultState extends State<Check_Result> {
     average = (sum / marks.length) / 10;
     return average;
   }
-//this is for when we add marks then calculate spi autometic.
 
-  // Future addSPI(List<double> sumlist, List<String> Subjectlength,
-  //     List<String> sem) async {
-  //   for (int i = 0; i <= sem.length - 1; i++) {
-  //     await FirebaseFirestore.instance.collection(uType).doc(uId).update(
-  //       {
-  //         'SPI' '${i + 1}':
-  //             ((sumlist[i] / double.parse(Subjectlength[i])) / 10.0),
-  //       },
-  //     );
-  //   }
-  //   print('SPI added');
-  //   print("Calculate sumofcpi");
-  //   // addcpi();
-  // }
+  showresultdata(SingleValueDropDownController semestercontroller) {
+    Map<String, dynamic> mapvalue =
+        resultlist[(int.parse(semestercontroller.dropDownValue!.name) - 1)];
+    print(mapvalue);
 
-  // Future addcpi() async {
-  //   for (int i = 1; i <= ssemester; i++) {
-  //     await FirebaseFirestore.instance.collection(uType).doc(uId).get().then(
-  //       (value) {
-  //         sumofspi += value['SPI$i'];
-  //       },
-  //     );
-  //   }
-  //   print(sumofspi);
-  //   CPI = sumofspi / ssemester;
-  //   await FirebaseFirestore.instance.collection(uType).doc(uId).update(
-  //     {
-  //       'CPI': CPI,
-  //     },
-  //   );
-  //   print("finally CPI added");
-  // }
+    List<Widget> rows = [];
+
+    mapvalue.forEach(
+      (key, value) {
+        rows.add(
+          Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    key,
+                    style: TextStyle(
+                      fontSize: 20,
+                    ),
+                  ),
+                  Text(
+                    value,
+                    style: TextStyle(
+                      fontSize: 20,
+                    ),
+                  ),
+                ],
+              ),
+              Divider(
+                thickness: 2,
+                height: 1,
+              ),
+              SizedBox(
+                height: 10,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+    return Column(
+      children: rows,
+    );
+  }
 }

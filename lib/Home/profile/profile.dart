@@ -1,8 +1,6 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:date_time_format/date_time_format.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -19,37 +17,37 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
-  final user = FirebaseAuth.instance.currentUser;
-  final String ut = uType;
-  final String ui = uId;
-  String fname = '';
-  String mname = '';
-  String lname = '';
-  String mail = '';
-  num phone = 0;
-  String course = '';
-  int semester = 0;
-  int year = 0;
-  String enrollment = '';
-  String id = '';
-  String department = '';
-  String accounttype = '';
-  String teacherid = '';
-  String adminid = '';
-  String profileimageurl = '';
+  // final user = FirebaseAuth.instance.currentUser;
+  // final String ut = uType;
+  // final String ui = uId;
+  // String fname = '';
+  // String mname = '';
+  // String lname = '';
+  // String mail = '';
+  // num phone = 0;
+  // String course = '';
+  // int semester = 0;
+  // int year = 0;
+  // String enrollment = '';
+  // String id = '';
+  // String department = '';
+  // String teacherid = '';
+  // String adminid = '';
+  // String profileimageurl = '';
 
   @override
   void initState() {
     super.initState();
-    getLocalData();
-    print('$uType $uId'); //getting login user data
-    userData();
+    getloginuserdata(uType, uId);
+    // getLocalData();
+    // print('$uType $uId'); //getting login user data
+    // userData();
   }
 
   File? profileimage;
 
   final ImagePicker _picker = ImagePicker();
-  String profilephotourl = '';
+  // String profilephotourl = '';
   String profileurl = '';
 
   @override
@@ -70,7 +68,7 @@ class _ProfileState extends State<Profile> {
             Visibility(
               child: Column(
                 children: [
-                  addProfileField('Name', '$fname $mname $lname'),
+                  addProfileField('Name', '$firstname $midlename $lastname'),
                 ],
               ),
             ),
@@ -80,11 +78,11 @@ class _ProfileState extends State<Profile> {
               visible: uType == 'Student',
               child: Column(
                 children: [
-                  addProfileField('Enrollment No', enrollment),
-                  addProfileField('Email', mail),
+                  addProfileField('Enrollment No', enrollmentno),
+                  addProfileField('Email', email),
                   addProfileField('Phone No', phone.toString()),
                   addProfileField('Account Type', accounttype),
-                  addProfileField('Branch', course),
+                  addProfileField('Branch', branch),
                   addProfileField('Semester', semester.toString()),
                   addProfileField('Year', year.toString()),
                 ],
@@ -96,7 +94,7 @@ class _ProfileState extends State<Profile> {
               child: Column(
                 children: [
                   addProfileField('Admin Id', adminid),
-                  addProfileField('Email', mail),
+                  addProfileField('Email', email),
                   addProfileField('Phone No', phone.toString()),
                   addProfileField('Account Type', accounttype),
                   addProfileField('Department', department),
@@ -110,7 +108,7 @@ class _ProfileState extends State<Profile> {
               child: Column(
                 children: [
                   addProfileField('Teacher Id', teacherid),
-                  addProfileField('Email', mail),
+                  addProfileField('Email', email),
                   addProfileField('Phone No', phone.toString()),
                   addProfileField('Account Type', accounttype),
                   addProfileField('Department', department),
@@ -196,42 +194,42 @@ class _ProfileState extends State<Profile> {
   }
 
 //get login user data method
-  Future userData() async {
-    await FirebaseFirestore.instance.collection(uType).doc(uId).get().then(
-      (snapshot) async {
-        if (snapshot.exists) {
-          setState(
-            () {
-              if (uType == 'Student') {
-                semester = snapshot.data()!['Semester'];
-                enrollment = snapshot.data()!['Enrollment No'];
-                course = snapshot.data()!['Branch'];
-              } else if (uType == 'Teacher') {
-                teacherid = snapshot.data()!['TID'];
-                department = snapshot.data()!['Department'];
-              } else if (uType == 'Admin') {
-                adminid = snapshot.data()!['AID'];
-                department = snapshot.data()!['Department'];
-              }
-              fname = snapshot.data()!['First Name'];
-              mname = snapshot.data()!['Midle Name'];
-              lname = snapshot.data()!['Last Name'];
-              mail = snapshot.data()!['Email'];
-              phone = snapshot.data()!['Phone'];
-              year = snapshot.data()!['Year'];
-              accounttype = snapshot.data()!['Account Type'];
-              profileimageurl = snapshot.data()!['Profile Photo'];
-            },
-          );
-          setState(() {});
-          print(enrollment);
-          print(semester);
-          print(course);
-          print('User data loaded....');
-        }
-      },
-    );
-  }
+  // Future userData() async {
+  //   await FirebaseFirestore.instance.collection(uType).doc(uId).get().then(
+  //     (snapshot) async {
+  //       if (snapshot.exists) {
+  //         setState(
+  //           () {
+  //             if (uType == 'Student') {
+  //               semester = snapshot.data()!['Semester'];
+  //               enrollment = snapshot.data()!['Enrollment No'];
+  //               course = snapshot.data()!['Branch'];
+  //             } else if (uType == 'Teacher') {
+  //               teacherid = snapshot.data()!['TID'];
+  //               department = snapshot.data()!['Department'];
+  //             } else if (uType == 'Admin') {
+  //               adminid = snapshot.data()!['AID'];
+  //               department = snapshot.data()!['Department'];
+  //             }
+  //             fname = snapshot.data()!['First Name'];
+  //             mname = snapshot.data()!['Midle Name'];
+  //             lname = snapshot.data()!['Last Name'];
+  //             mail = snapshot.data()!['Email'];
+  //             phone = snapshot.data()!['Phone'];
+  //             year = snapshot.data()!['Year'];
+  //             accounttype = snapshot.data()!['Account Type'];
+  //             profileimageurl = snapshot.data()!['Profile Photo'];
+  //           },
+  //         );
+  //         setState(() {});
+  //         print(enrollment);
+  //         print(semester);
+  //         print(course);
+  //         print('User data loaded....');
+  //       }
+  //     },
+  //   );
+  // }
 
   //profile image method
   profileImage(BuildContext context) {
@@ -242,7 +240,7 @@ class _ProfileState extends State<Profile> {
             radius: 80,
             backgroundColor: Colors.white,
             backgroundImage: NetworkImage(
-              profileimageurl.toString(),
+              profilephoto.toString(),
             ),
           ),
         ),
@@ -327,17 +325,17 @@ class _ProfileState extends State<Profile> {
         if (uType == 'Student') {
           final file = File(profileimage!.path);
           final storageref = FirebaseStorage.instance.ref().child(
-              'images/Profile/StudentProfilePhoto/${enrollment.toString()}');
+              'images/Profile/StudentProfilePhoto/${enrollmentno.toString()}');
           storageref.putFile(file).whenComplete(
             () async {
               profileurl = await FirebaseStorage.instance
                   .ref()
                   .child(
-                      'images/Profile/StudentProfilePhoto/${enrollment.toString()}')
+                      'images/Profile/StudentProfilePhoto/${enrollmentno.toString()}')
                   .getDownloadURL()
                   .whenComplete(() {});
               setState(() {
-                profileimageurl = profileurl;
+                profilephoto = profileurl;
               });
               set();
             },
@@ -355,7 +353,7 @@ class _ProfileState extends State<Profile> {
                   .getDownloadURL()
                   .whenComplete(() {});
               setState(() {
-                profileimageurl = profileurl;
+                profilephoto = profileurl;
               });
               set();
             },
@@ -374,7 +372,7 @@ class _ProfileState extends State<Profile> {
                   .getDownloadURL()
                   .whenComplete(() {});
               setState(() {
-                profileimageurl = profileurl;
+                profilephoto = profileurl;
               });
               set();
             },
@@ -399,14 +397,14 @@ class _ProfileState extends State<Profile> {
   Future set() async {
     return await FirebaseFirestore.instance.collection(uType).doc(uId).update(
       {
-        'Profile Photo': profileimageurl.toString(),
+        'Profile Photo': profilephoto.toString(),
         'Account Type': accounttype.toString(),
-        'Branch': course.toString(),
-        'Email': mail.toString(),
-        'Enrollment No': enrollment.toString(),
-        'First Name': fname.toString(),
-        'Midle Name': mname.toString(),
-        'Last Name': lname.toString(),
+        'Branch': branch.toString(),
+        'Email': email.toString(),
+        'Enrollment No': enrollmentno.toString(),
+        'First Name': firstname.toString(),
+        'Midle Name': midlename.toString(),
+        'Last Name': lastname.toString(),
         'Phone': phone.toString(),
         'Semester': semester.toString(),
         'Year': year.toString(),

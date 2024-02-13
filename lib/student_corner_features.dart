@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_app/check_result.dart';
 import 'package:my_app/college_fee.dart';
+import 'package:my_app/download_document.dart';
 import 'package:my_app/download_result.dart';
 import 'package:my_app/exam_fee.dart';
 import 'package:my_app/request_document.dart';
@@ -18,16 +19,19 @@ class _StudetnCornerFeaturesState extends State<StudetnCornerFeatures> {
     'Download Result',
     'Pay College Fee',
     'Pay Exam Fee',
-    'Request Document'
+    'Request Document',
+    'Download Document'
   ];
   List<Widget> gotopagelist = [
     Check_Result(),
-    Download_Result(),
+    DownloadPDFScreen(),
     College_Fee(),
     Exam_fee(),
-    Request_Document()
+    Request_Document(),
+    DownloadDocument()
   ];
   List iconlist = [
+    Icon(Icons.add),
     Icon(Icons.add),
     Icon(Icons.add),
     Icon(Icons.add),
@@ -49,7 +53,7 @@ class _StudetnCornerFeaturesState extends State<StudetnCornerFeatures> {
       body: GridView.builder(
         gridDelegate:
             SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-        itemCount: 5,
+        itemCount: 6,
         itemBuilder: (context, index) {
           return Column(
             children: [

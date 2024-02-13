@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -11,11 +10,6 @@ import 'package:my_app/utils/Drawer/teacherlist/teacherlist.dart';
 import 'package:my_app/utils/constant/constants.dart';
 import 'package:my_app/utils/login/choise.dart';
 
-// void main(List<String> args) {
-//   runApp(
-//     const MyApp(),
-//   );
-// }
 class Navbar extends StatefulWidget {
   const Navbar({super.key});
 
@@ -24,22 +18,14 @@ class Navbar extends StatefulWidget {
 }
 
 class _NavbarState extends State<Navbar> {
-  final user = FirebaseAuth.instance.currentUser;
-  String fname = '';
-  String lname = '';
-  String mname = '';
-  String mail = '';
-  String type = '';
-  String profileimageurl = '';
+  // final user = FirebaseAuth.instance.currentUser;
+  // String fname = '';
+  // String lname = '';
+  // String mname = '';
+  // String mail = '';
+  // String type = '';
+  // String profileimageurl = '';
 
-  @override
-  void initState() {
-    super.initState();
-    getLocalData();
-    userData();
-    getloginuserdata(uType, uId);
-    setState(() {});
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,19 +35,19 @@ class _NavbarState extends State<Navbar> {
         children: [
           // navbar account photo
           UserAccountsDrawerHeader(
-            accountName: Text('$fname $lname'),
+            accountName: Text('$firstname $lastname'),
             accountEmail: Padding(
               padding: const EdgeInsets.only(right: 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(mail),
-                  Text(type),
+                  Text(email),
+                  Text(uType),
                 ],
               ),
             ),
             currentAccountPicture: CircleAvatar(
-              backgroundImage: NetworkImage(profileimageurl.toString()),
+              backgroundImage: NetworkImage(profilephoto.toString()),
               backgroundColor: Colors.transparent,
             ),
             decoration: const BoxDecoration(
@@ -265,22 +251,22 @@ class _NavbarState extends State<Navbar> {
     );
   }
 
-  Future userData() async {
-    await FirebaseFirestore.instance
-        .collection(uType.toString())
-        .doc(uId.toString())
-        .get()
-        .then((snapshot) {
-      if (snapshot.exists) {
-        setState(() {
-          fname = snapshot.data()!['First Name'];
-          mname = snapshot.data()!['Midle Name'];
-          lname = snapshot.data()!['Last Name'];
-          mail = snapshot.data()!['Email'];
-          type = snapshot.data()!['Account Type'];
-          profileimageurl = snapshot.data()!['Profile Photo'];
-        });
-      }
-    });
-  }
+  // Future userData() async {
+  //   await FirebaseFirestore.instance
+  //       .collection(uType.toString())
+  //       .doc(uId.toString())
+  //       .get()
+  //       .then((snapshot) {
+  //     if (snapshot.exists) {
+  //       setState(() {
+  //         fname = snapshot.data()!['First Name'];
+  //         mname = snapshot.data()!['Midle Name'];
+  //         lname = snapshot.data()!['Last Name'];
+  //         mail = snapshot.data()!['Email'];
+  //         type = snapshot.data()!['Account Type'];
+  //         profileimageurl = snapshot.data()!['Profile Photo'];
+  //       });
+  //     }
+  //   });
+  // }
 }

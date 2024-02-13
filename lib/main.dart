@@ -1,3 +1,4 @@
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -11,7 +12,7 @@ import 'package:my_app/utils/login/choise.dart';
 Future main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
+  await FirebaseAppCheck.instance.activate();
   // FirebaseMessaging.onBackgroundMessage(_firebasemessagingBackgroundHandler);
   runApp(MyApp());
 }
@@ -29,6 +30,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  bool _isloading = true;
   @override
   void initState() {
     super.initState();
@@ -52,7 +54,16 @@ class _MyAppState extends State<MyApp> {
                 }
                 if (snapshot.hasData) {
                   if (uType.isNotEmpty) {
-                    return ForStudent();
+                    getloginuserdata(uType, uId);
+                    while (phone.isNaN) {
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                    if (phone.isFinite) {
+                      print('Phone number is in main.dart file is $phone');
+                      return ForStudent();
+                    }
                   } else {
                     return Choise();
                   }

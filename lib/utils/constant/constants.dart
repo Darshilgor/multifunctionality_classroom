@@ -13,18 +13,17 @@ String email = '';
 String enrollmentno = '';
 String teacherid = '';
 String adminid = '';
-String midlename = '';
 String firstname = '';
 String lastname = '';
-
-late num phone;
+String midlename = '';
+num phone = 0;
 String profilephoto = '';
 List<double> spilist = [];
 
 GetList getlist = GetList();
 
 int semester = 0;
-late int year;
+int year = 0;
 
 List<String> getbranchlist = [];
 String eventTitle = '';
@@ -35,6 +34,8 @@ DateTime? eventDueDate;
 String? eventLink;
 String eventCoverPhoto = '';
 Timestamp? timestamp;
+  List<Map<String, dynamic>> resultlist = [];
+
 
 //store current login usertype and userid
 Future setLocalData(String usertype, String userid) async {
@@ -55,13 +56,7 @@ Future getloginuserdata(uType, uId) async {
   return await FirebaseFirestore.instance.collection(uType).doc(uId).get().then(
     (DocumentSnapshot snapshot) {
       if (snapshot.exists) {
-        accounttype = snapshot['Account Type'];
-        email = snapshot['Email'];
-        firstname = snapshot['First Name'];
-        midlename = snapshot['Midle Name'];
-        lastname = snapshot['Last Name'];
-        profilephoto = snapshot['Profile Photo'];
-        phone = snapshot['Phone'];
+        
         if (uType == 'Teacher') {
           department = snapshot['Department'];
           teacherid = snapshot['TID'];
@@ -81,6 +76,13 @@ Future getloginuserdata(uType, uId) async {
           department = snapshot['Department'];
           adminid = snapshot['AID'];
         }
+        accounttype = snapshot['Account Type'];
+        email = snapshot['Email'];
+        firstname = snapshot['First Name'];
+        midlename = snapshot['Midle Name'];
+        lastname = snapshot['Last Name'];
+        profilephoto = snapshot['Profile Photo'];
+        phone = snapshot['Phone'];
       }
       print(semester);
       print('SPI List In Constant File Is ${spilist}');
@@ -90,75 +92,39 @@ Future getloginuserdata(uType, uId) async {
       }
       print('SPI List in Constant file $spilist');
       // print('Subject List in Constant File $subjectlist');
-      return {'firstname': firstname, 'lastname': lastname};
     },
   );
 }
 
-Future<List<double>> getstudentresult(String uType, String uId) async {
+Future<List<Map<String, dynamic>>> getstudentresult(
+    String uType, String uId) async {
   List<double> spivaluelist = [];
-  List<List<String>> subjectlist = [[]];
+  List<Map<dynamic, dynamic>> subjectlist = [];
+
   await getlist.getsemesterlistforresult().then(
     (value) async {
+      print('Value is in constants dart file is $value');
       for (int i = 0; i < value.length; i++) {
-        print(value);
-        print('You Reached there');
-        await FirebaseFirestore.instance
+        QuerySnapshot snapshot = await FirebaseFirestore.instance
             .collection(uType)
             .doc(uId)
-            .collection(value[i].name)
-            .get()
-            .then(
-          (QuerySnapshot snapshot) {
-            snapshot.docs.forEach(
-              (element) {
-                // print(
-                //     'In Constant File Marks of ${value[i].name} Is ${element['Marks']}');
-                // marks += element['Marks'];
-                // print(
-                //     'In Constant File Total Marks of ${value[i].name} Is ${marks}');
-                // print(
-                //     'Length of documents In ${value[i]} Is ${snapshot.docs.length}');
-                // spivaluelist.add(marks / snapshot.docs.length);
+            .collection(value[i].name.toString())
+            .get();
+        Map<String, dynamic> mapobject = {};
 
-                // for (int j = 0; j < snapshot.docs.length; j++) {
-                //   subjectlist[i][j] = element['Subject'];
-                // }
-              },
-            );
-          },
-        );
+        for (QueryDocumentSnapshot sn in snapshot.docs) {
+          mapobject.addAll({'${sn['Subject']}': '${sn['Marks']}'});
+          print('Map object is in for loop is $mapobject');
+        }
+        resultlist.add(mapobject);
       }
     },
   );
-  print('SPI List in Constant file $spivaluelist');
-  print('Subject List in Constant File $subjectlist');
-  return spivaluelist;
-  // return FutureBuilder(
-  //   future: getlist.getsemesterlistforresult(),
-  //   builder: (context, future) {
-  //     if (future.hasData) {
-  //       list = future.data;
-  //       spilist = getstudentresultdetails(list) as List<double>;
-  //       print('List of SPI IS This $spilist');
-  //     }
-
-  //   },
-  // );
+  print('Result list is in constant dart file is $resultlist');
+  return resultlist;
+ 
 }
 
-// Future<List<double>> getstudentresultdetails(
-//     List<DropDownValueModel> list) async {
-
-//   for (int i = 0; i < list.length; i++) {
-
-//     spilist.add(marks / noofsubject);
-//     print('SPI List in Constant file $spilist');
-//     print('Subject List in Constant File $subjectlist');
-//   }
-
-//   return spilist;
-// }
 
 //for logout remove current usertype and userid and userdetail
 Future removeLocalData() async {
@@ -166,14 +132,3 @@ Future removeLocalData() async {
   await pref.remove('uType');
   await pref.remove('uId');
 }
-
-// Future setdata() async {
-//   if (uType == 'Student') {
-//     await FirebaseFirestore.instance.collection(uType).doc(uId).get().then(
-//       (value) {
-//         studentsemester = value['Semester'] as int;
-//       },
-//     );
-//   }
-//   print(studentsemester);
-// }

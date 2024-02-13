@@ -390,7 +390,8 @@ class _UserLogInState extends State<UserLogIn> {
                               uId = id;
                               await setLocalData(
                                   collection, idcontroller.text.toString());
-                              await getloginuserdata(collection, id);
+                              await getloginuserdata(
+                                  collection, idcontroller.text.toString());
                               if (mounted) {
                                 Navigator.popUntil(
                                     context, (route) => route.isFirst);
@@ -500,7 +501,9 @@ class _UserLogInState extends State<UserLogIn> {
                               uId = id;
                               await setLocalData(
                                   collection, idcontroller.text.toString());
-                              await getloginuserdata(collection, id);
+
+                              await getloginuserdata(
+                                  collection, idcontroller.text.toString());
                               if (mounted) {
                                 Navigator.popUntil(
                                     context, (route) => route.isFirst);

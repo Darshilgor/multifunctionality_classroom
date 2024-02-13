@@ -7,7 +7,6 @@ import 'package:my_app/Home/profile/profile.dart';
 import 'package:my_app/notification_services.dart';
 import 'package:my_app/utils/Drawer/navbar.dart';
 
-import '../utils/constant/constants.dart';
 import 'dashboard/dashboard.dart';
 import 'package:http/http.dart' as http;
 
@@ -30,6 +29,7 @@ class _HomeState extends State<ForStudent> {
     notificationservices.requestnotificationpermission();
     notificationservices.firebaseinit();
     notificationservices.ontokenrefresh();
+
     notificationservices.getdevicetoken().then(
           (value) => print(
             value,
@@ -52,7 +52,6 @@ class _HomeState extends State<ForStudent> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: Navbar(),
-      // drawer: const Navbar(),
       appBar: AppBar(
         centerTitle: true,
         elevation: 6,

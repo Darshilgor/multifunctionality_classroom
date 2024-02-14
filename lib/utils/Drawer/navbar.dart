@@ -25,10 +25,17 @@ class _NavbarState extends State<Navbar> {
   // String mail = '';
   // String type = '';
   // String profileimageurl = '';
-
+  @override
+  void initState() {
+    getLocalData();
+    setState(() {});
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
+    print('user type is in navbar is $uType');
+    print('user id is in navbar is $uId');
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -206,11 +213,12 @@ class _NavbarState extends State<Navbar> {
             ),
           ),
           ListTile(
-            onTap: () {
+            onTap: () async {
               try {
                 FirebaseAuth.instance.sendPasswordResetEmail(email: email).then(
                     (value) => Fluttertoast.showToast(
                         msg: 'Mail was send for resent password'));
+                await disposelocaldata(uType, uId);
                 Navigator.pushReplacement(
                     context, MaterialPageRoute(builder: (context) => Choise()));
                 FirebaseAuth.instance.signOut();
@@ -233,6 +241,7 @@ class _NavbarState extends State<Navbar> {
             onTap: () {
               FirebaseAuth.instance.signOut();
               {
+                disposelocaldata(uType, uId);
                 Navigator.pushReplacement(context,
                     MaterialPageRoute(builder: (context) => const Choise()));
               }

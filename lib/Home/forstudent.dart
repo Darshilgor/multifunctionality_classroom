@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:my_app/Home/classroom/classroom.dart';
 import 'package:my_app/Home/liveclass/liveclass.dart';
 import 'package:my_app/Home/profile/profile.dart';
@@ -11,9 +12,8 @@ import 'dashboard/dashboard.dart';
 import 'package:http/http.dart' as http;
 
 class ForStudent extends StatefulWidget {
-  const ForStudent({
-    super.key,
-  });
+  final String usertype, userid;
+  const ForStudent({super.key, required this.userid, required this.usertype});
 
   @override
   State<ForStudent> createState() => _HomeState();

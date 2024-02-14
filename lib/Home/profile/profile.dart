@@ -122,9 +122,11 @@ class _ProfileState extends State<Profile> {
             Center(
               //log out button
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
+
                   FirebaseAuth.instance.signOut();
                   {
+                    disposelocaldata(uType,uId);
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(

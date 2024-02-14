@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:my_app/Home/forstudent.dart';
 import 'package:my_app/utils/constant/constants.dart';
@@ -145,6 +143,7 @@ class _UserLogInState extends State<UserLogIn> {
                             if (email.isNotEmpty) {
                               FirebaseAuth.instance
                                   .sendPasswordResetEmail(email: email);
+                              await disposelocaldata(uType,uId);
                               Fluttertoast.showToast(msg: 'Mail was sended');
                             } else {
                               Fluttertoast.showToast(
@@ -276,20 +275,33 @@ class _UserLogInState extends State<UserLogIn> {
                           )
                               .then(
                             (value) async {
+                              print(
+                                  'collection is in user login dart file is $collection');
+                              print(
+                                  'id controller is in user login dart file is ${idcontroller.text.toString()}');
                               await setLocalData(
-                                  collection, idcontroller.text.toString());
-                              await getloginuserdata(
-                                  collection, idcontroller.text.toString());
-                              if (mounted) {
-                                Navigator.popUntil(
-                                    context, (route) => route.isFirst);
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ForStudent(),
-                                  ),
-                                );
-                              }
+                                      collection, idcontroller.text.toString())
+                                  .whenComplete(() async {
+                                print(
+                                    'Ser local data of user is $uType and $uId');
+                                print(
+                                    'Ser local data of user is $collection and ${idcontroller.text.toString()}');
+                                await getloginuserdata(
+                                    collection, idcontroller.text.toString());
+
+                                if (mounted) {
+                                  Navigator.popUntil(
+                                      context, (route) => route.isFirst);
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ForStudent(
+                                          usertype: collection,
+                                          userid: idcontroller.text.toString()),
+                                    ),
+                                  );
+                                }
+                              });
                             },
                           ).catchError(
                             (error) {
@@ -398,7 +410,10 @@ class _UserLogInState extends State<UserLogIn> {
                                 Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => ForStudent(),
+                                    builder: (context) => ForStudent(
+                                      userid: idcontroller.text.toString(),
+                                      usertype: collection,
+                                    ),
                                   ),
                                 );
                               }
@@ -510,7 +525,10 @@ class _UserLogInState extends State<UserLogIn> {
                                 Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => ForStudent(),
+                                    builder: (context) => ForStudent(
+                                      userid: idcontroller.text.toString(),
+                                      usertype: collection,
+                                    ),
                                   ),
                                 );
                               }

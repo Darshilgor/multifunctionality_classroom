@@ -1,13 +1,14 @@
 import 'package:firebase_app_check/firebase_app_check.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_app/Home/forstudent.dart';
-
 import 'package:my_app/firebase_options.dart';
 import 'package:my_app/utils/constant/constants.dart';
 import 'package:my_app/utils/login/choise.dart';
+import 'package:my_app/utils/login/loginbloc/login_bloc.dart';
+import 'package:my_app/utils/login/loginbloc/login_state.dart';
 
 Future main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +31,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  bool _isloading = true;
   @override
   void initState() {
     super.initState();
@@ -38,40 +38,59 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: "MyApp",
-      home: FutureBuilder(
-          future: getLocalData(),
-          builder: (context, future) {
-            return StreamBuilder(
-              stream: FirebaseAuth.instance.authStateChanges(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-                if (snapshot.hasData) {
-                  if (uType.isNotEmpty) {
-                    getloginuserdata(uType, uId);
-                    while (phone.isNaN) {
-                      return Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                    if (phone.isFinite) {
-                      print('Phone number is in main.dart file is $phone');
-                      return ForStudent();
-                    }
-                  } else {
-                    return Choise();
-                  }
-                }
-                return Choise();
-              },
-            );
-          }),
+    return BlocProvider(
+      create: (context) => LoginBloc(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: "MyApp",
+        home: SplashScreen(),
+      ),
+    );
+  }
+}
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<LoginBloc, LoginState>(
+      listener: (context, state) {
+        print('you entered in listener....');
+        print('user type is in lisner is $uType');
+        print('user type is in lisner is $uId');
+        print(state);
+
+        if (state is UsernotLoginState) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => Choise()),
+          );
+        }
+
+        if (state is UserLoginState) {
+          getloginuserdata(uType, uId);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ForStudent(
+                userid: uId,
+                usertype: uType,
+              ),
+            ),
+          );
+        }
+      },
+      child: Scaffold(
+        body: Center(
+          child: Image(image: AssetImage('assets/ldpr_logo.png')),
+        ),
+      ),
     );
   }
 }

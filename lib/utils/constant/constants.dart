@@ -34,29 +34,38 @@ DateTime? eventDueDate;
 String? eventLink;
 String eventCoverPhoto = '';
 Timestamp? timestamp;
-  List<Map<String, dynamic>> resultlist = [];
-
+List<Map<String, dynamic>> resultlist = [];
 
 //store current login usertype and userid
 Future setLocalData(String usertype, String userid) async {
   SharedPreferences pref = await SharedPreferences
       .getInstance(); //use for set data in local variable.
-  pref.setString("uType", usertype);
-  pref.setString("uId", userid);
+  await pref.setString("uType", usertype);
+  await pref.setString("uId", userid);
+  print('user type inside the set local data funciton in constatnts is $uType');
+  print('user type inside the set local data funciton in constatnts is $uId');
 }
 
 //get current login usertype and userid
 Future getLocalData() async {
+  print('Inside the get local data');
   SharedPreferences pref = await SharedPreferences.getInstance();
-  uType = pref.getString('uType') ?? uType;
-  uId = pref.getString('uId') ?? uId;
+  uType = await pref.getString('uType') ?? uType;
+  uId = await pref.getString('uId') ?? uId;
+  print('user type is in constant dart file is in $uType');
+  print('user id is in constant dart file is in $uId');
+}
+
+Future disposelocaldata(String usertype, String userid) async {
+  SharedPreferences pref = await SharedPreferences.getInstance();
+  await pref.remove("uType");
+  await pref.remove("uId");
 }
 
 Future getloginuserdata(uType, uId) async {
   return await FirebaseFirestore.instance.collection(uType).doc(uId).get().then(
     (DocumentSnapshot snapshot) {
       if (snapshot.exists) {
-        
         if (uType == 'Teacher') {
           department = snapshot['Department'];
           teacherid = snapshot['TID'];
@@ -91,6 +100,10 @@ Future getloginuserdata(uType, uId) async {
         getstudentresult(uType, uId);
       }
       print('SPI List in Constant file $spilist');
+      print('Phone number is in getuserdata is in constant file is $branch');
+      print('Department is in getuserdata is in constatnt file is $department');
+      print('Teacer id is in getuserdata in constant file is $teacherid');
+      print('Admin id is in getuserdata in constant file is $adminid');
       // print('Subject List in Constant File $subjectlist');
     },
   );
@@ -122,9 +135,7 @@ Future<List<Map<String, dynamic>>> getstudentresult(
   );
   print('Result list is in constant dart file is $resultlist');
   return resultlist;
- 
 }
-
 
 //for logout remove current usertype and userid and userdetail
 Future removeLocalData() async {

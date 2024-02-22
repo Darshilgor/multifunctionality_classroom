@@ -1,3 +1,4 @@
+import 'package:device_preview/device_preview.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -15,7 +16,9 @@ Future main(List<String> args) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await FirebaseAppCheck.instance.activate();
   // FirebaseMessaging.onBackgroundMessage(_firebasemessagingBackgroundHandler);
-  runApp(MyApp());
+  runApp(DevicePreview(
+    builder: (BuildContext context) => MyApp(),
+  ));
 }
 
 @pragma('vm:entry-point')

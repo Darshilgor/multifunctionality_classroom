@@ -63,6 +63,7 @@ dependencies:
   permission_handler: ^11.2.1 
   flutter_file_downloader: ^1.2.1
   flutter_bloc: ^8.1.4
+  device_preview: ^1.1.0
 
 dev_dependencies:
   flutter_test:

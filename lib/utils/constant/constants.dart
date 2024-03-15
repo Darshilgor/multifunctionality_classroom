@@ -51,6 +51,14 @@ Future getLocalData() async {
   print('Inside the get local data');
   SharedPreferences pref = await SharedPreferences.getInstance();
   uType = await pref.getString('uType') ?? uType;
+
+
+
+
+
+
+
+  
   uId = await pref.getString('uId') ?? uId;
   print('user type is in constant dart file is in $uType');
   print('user id is in constant dart file is in $uId');

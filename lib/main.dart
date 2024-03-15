@@ -88,8 +88,18 @@ class _SplashScreenState extends State<SplashScreen> {
       },
       child: Scaffold(
         body: Center(
-          child: Image(image: AssetImage('assets/ldpr_logo.png')),
-        ),
+            child: TweenAnimationBuilder(
+          tween: Tween<double>(
+            begin: 0.1,
+            end: 0.9,
+          ),
+          duration: Duration(milliseconds: 2000),
+          builder: (context, double opacity, child) {
+            return Opacity(
+                opacity: opacity,
+                child: Image(image: AssetImage('assets/ldpr_logo.png')));
+          },
+        )),
       ),
     );
   }
